@@ -1,0 +1,66 @@
+// Fix: Import ComponentType to resolve 'Cannot find namespace React' error.
+import type { ComponentType } from 'react';
+
+export enum UserRole {
+  Customer = 'customer',
+  Provider = 'provider',
+  Admin = 'admin',
+}
+
+export enum RequestStatus {
+  Open = 'open',
+  Assigned = 'assigned',
+  Completed = 'completed',
+}
+
+export enum BidStatus {
+  Pending = 'pending',
+  Accepted = 'accepted',
+  Rejected = 'rejected',
+}
+
+export interface User {
+  id: number;
+  name: string;
+  role: UserRole;
+  contactInfo: string;
+  registeredAt: Date;
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  // Fix: Use the imported ComponentType directly.
+  icon: ComponentType<{ className?: string }>;
+}
+
+export interface ServiceRequest {
+  id: number;
+  customerId: number;
+  title: string;
+  description: string;
+  categoryId: number;
+  status: RequestStatus;
+  createdAt: Date;
+  assignedProviderId?: number;
+  acceptedBidId?: number;
+  beforeImageUrl?: string;
+  afterImageUrl?: string;
+}
+
+export interface Bid {
+  id: number;
+  requestId: number;
+  providerId: number;
+  price: number;
+  message?: string;
+  status: BidStatus;
+}
+
+export interface Rating {
+  id: number;
+  requestId: number;
+  providerId: number;
+  customerId: number;
+  score: number; // 1 to 10
+}

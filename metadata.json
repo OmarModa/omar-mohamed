@@ -1,0 +1,5 @@
+{
+  "name": "Service Marketplace",
+  "description": "A simple application where users can request services and providers can bid on them. Customers can then choose a provider, get the service done, and rate them.",
+  "requestFramePermissions": []
+}
