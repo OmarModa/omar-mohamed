@@ -18,6 +18,7 @@ import { TermsPage } from './components/TermsPage';
 import { HTTPSRedirect } from './components/HTTPSRedirect';
 import { UserIcon } from './components/icons';
 import { api } from './lib/api';
+import { WhatsAppButton } from './components/WhatsAppButton';
 
 
 type View = 'landing' | 'home' | 'details' | 'profile' | 'admin' | 'providers' | 'user-profile' | 'services' | 'my-services' | 'service-market' | 'my-purchases' | 'terms';
@@ -902,6 +903,7 @@ const App: React.FC = () => {
       <main className={view === 'landing' ? 'mt-0' : 'container mx-auto p-4 md:p-6'}>
         {renderContent()}
       </main>
+      <WhatsAppButton />
     </div>
   );
 };
