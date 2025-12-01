@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- Homepage -->
+  <url>
+    <loc>https://service-market.kw/</loc>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://service-market.kw/" />
+    <xhtml:link rel="alternate" hreflang="ar-KW" href="https://service-market.kw/" />
+  </url>
+
+  <!-- About/Landing Page -->
+  <url>
+    <loc>https://service-market.kw/landing</loc>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://service-market.kw/landing" />
+  </url>
+
+  <!-- Services Page -->
+  <url>
+    <loc>https://service-market.kw/services</loc>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://service-market.kw/services" />
+  </url>
+
+  <!-- Service Categories -->
+  <url>
+    <loc>https://service-market.kw/services/cars</loc>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://service-market.kw/services/ac</loc>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://service-market.kw/services/electricity</loc>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://service-market.kw/services/cleaning</loc>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://service-market.kw/services/plumbing</loc>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://service-market.kw/services/volunteer</loc>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Providers Page -->
+  <url>
+    <loc>https://service-market.kw/providers</loc>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://service-market.kw/providers" />
+  </url>
+
+  <!-- Service Market Page -->
+  <url>
+    <loc>https://service-market.kw/service-market</loc>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://service-market.kw/service-market" />
+  </url>
+
+  <!-- Terms and Conditions -->
+  <url>
+    <loc>https://service-market.kw/terms</loc>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://service-market.kw/terms" />
+  </url>
+
+  <!-- Regions -->
+  <url>
+    <loc>https://service-market.kw/region/capital</loc>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://service-market.kw/region/hawalli</loc>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://service-market.kw/region/salmiya</loc>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://service-market.kw/region/farwaniya</loc>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+</urlset>
