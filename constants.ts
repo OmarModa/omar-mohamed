@@ -4,7 +4,7 @@ import { UserRole, RequestStatus, BidStatus } from './types';
 import {
     CarIcon, AcIcon, ElectricityIcon, CleaningIcon,
     GavelIcon, WrenchIcon, BookOpenIcon, SproutIcon, CodeIcon, TruckIcon, DropIcon,
-    PaletteIcon, MegaphoneIcon, HammerIcon, SatelliteIcon, PartyPopperIcon, CoffeeIcon, HeartPulseIcon, PackageIcon
+    PaletteIcon, MegaphoneIcon, HammerIcon, SatelliteIcon, PartyPopperIcon, CoffeeIcon, HeartPulseIcon, PackageIcon, ScissorsIcon
 } from './components/icons';
 
 export const CATEGORIES: Category[] = [
@@ -28,6 +28,7 @@ export const CATEGORIES: Category[] = [
   { id: 18, name: 'الضيافة', icon: CoffeeIcon },
   { id: 19, name: 'الرعاية الصحية المنزلية', icon: HeartPulseIcon },
   { id: 20, name: 'التوصيل', icon: PackageIcon },
+  { id: 21, name: 'صالون تجميل', icon: ScissorsIcon },
 ];
 
 export const REGIONS = [
