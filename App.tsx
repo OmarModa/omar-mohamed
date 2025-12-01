@@ -307,6 +307,7 @@ const App: React.FC = () => {
       setRequests(requestsData.map(r => ({
         id: parseInt(r.id.toString()),
         customerId: parseInt(r.customer_id.substring(0, 8), 16),
+        customerUuid: r.customer_id,
         title: r.title,
         description: r.description,
         categoryId: r.category_id,
@@ -512,36 +513,63 @@ const App: React.FC = () => {
       await _createRequest(currentUser.uuid, { title, description, categoryId, beforeImageUrl: beforeImageUrl || undefined, suggestedBudget, region });
   }, [currentUser]);
   
-  const _placeBid = (providerId: number, {requestId, price, message}: {requestId: number, price: number, message: string}) => {
-      const newBid: Bid = {
-          id: Math.max(...bids.map(b => b.id), 0) + 1,
-          requestId,
-          providerId,
+  const _placeBid = async (providerUuid: string, providerName: string, {requestId, price, message}: {requestId: number, price: number, message: string}) => {
+      try {
+        await api.bids.create({
+          request_id: requestId,
+          provider_id: providerUuid,
           price,
-          message,
-          status: BidStatus.Pending,
-      };
-      setBids(prev => [...prev, newBid]);
+          message
+        });
 
-      // Notify Customer
-      const request = requests.find(r => r.id === requestId);
-      if (request) {
-          addNotification(
-              request.customerId,
-              `تم تقديم عرض جديد بقيمة ${price} د.ك على طلبك "${request.title}"`,
-              'info',
-              request.id
-          );
+        const request = requests.find(r => r.id === requestId);
+        if (request && request.customerUuid) {
+          const customerProfile = await api.profiles.getByIdSilent(request.customerUuid);
+
+          if (customerProfile) {
+            const authUser = await api.auth.getUserById(customerProfile.id);
+
+            if (authUser?.email) {
+              try {
+                const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+                const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+                await fetch(`${supabaseUrl}/functions/v1/notify-bid-received`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${supabaseAnonKey}`
+                  },
+                  body: JSON.stringify({
+                    request_id: requestId,
+                    provider_name: providerName,
+                    bid_price: price,
+                    request_title: request.title,
+                    customer_email: authUser.email,
+                    customer_name: customerProfile.name
+                  })
+                });
+              } catch (emailError) {
+                console.error('Failed to send email notification:', emailError);
+              }
+            }
+          }
+        }
+
+        await loadData();
+      } catch (error) {
+        console.error('Error placing bid:', error);
+        alert('حدث خطأ أثناء تقديم العرض');
       }
   };
 
-  const handlePlaceBid = useCallback((requestId: number, price: number, message: string) => {
-      if (!currentUser) {
+  const handlePlaceBid = useCallback(async (requestId: number, price: number, message: string) => {
+      if (!currentUser || !currentUser.uuid) {
           setShowLoginModal(true);
           return;
       }
-      _placeBid(currentUser.id, { requestId, price, message });
-  }, [currentUser, bids, requests]);
+      await _placeBid(currentUser.uuid, currentUser.name, { requestId, price, message });
+  }, [currentUser, requests]);
 
 
   const handleAcceptBid = useCallback((bidToAccept: Bid) => {

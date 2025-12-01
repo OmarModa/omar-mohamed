@@ -43,18 +43,19 @@ export interface Category {
 export interface ServiceRequest {
   id: number;
   customerId: number;
+  customerUuid?: string;
   title: string;
   description: string;
   categoryId: number;
-  region: string; // Added region
+  region: string;
   status: RequestStatus;
   createdAt: Date;
   assignedProviderId?: number;
   acceptedBidId?: number;
   beforeImageUrl?: string;
   afterImageUrl?: string;
-  completedAt?: Date; 
-  suggestedBudget?: number; 
+  completedAt?: Date;
+  suggestedBudget?: number;
 }
 
 export interface Bid {

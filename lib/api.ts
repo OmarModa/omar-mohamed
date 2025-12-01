@@ -56,6 +56,18 @@ export const api = {
       return user;
     },
 
+    async getUserById(userId: string) {
+      const { data: { user }, error } = await supabase.auth.admin.getUserById(userId);
+      if (error) {
+        const { data } = await supabase.auth.getUser();
+        if (data?.user?.id === userId) {
+          return data.user;
+        }
+        return null;
+      }
+      return user;
+    },
+
     onAuthStateChange(callback: (user: any) => void) {
       return supabase.auth.onAuthStateChange((event, session) => {
         callback(session?.user || null);
@@ -82,6 +94,16 @@ export const api = {
         .maybeSingle();
 
       if (error) throw error;
+      return data as Profile | null;
+    },
+
+    async getByIdSilent(id: string) {
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+
       return data as Profile | null;
     },
 
