@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { USERS, CATEGORIES, SERVICE_REQUESTS, BIDS, RATINGS, REGIONS, NOTIFICATIONS } from './constants';
 import type { User, ServiceRequest, Bid, Rating, Category, AppNotification } from './types';
 import { UserRole, RequestStatus, BidStatus } from './types';
@@ -9,8 +9,9 @@ import { RequestDetails } from './components/RequestDetails';
 import { MyProfilePage } from './components/MyProfilePage';
 import { AdminPage } from './components/AdminPage';
 import { ProvidersPage } from './components/ProvidersPage';
-import { ServicesPage } from './components/ServicesPage'; // Import ServicesPage
+import { ServicesPage } from './components/ServicesPage';
 import { UserIcon } from './components/icons';
+import { api } from './lib/api';
 
 
 type View = 'home' | 'details' | 'profile' | 'admin' | 'providers' | 'user-profile' | 'services';
@@ -20,180 +21,252 @@ interface PendingAction {
     payload: any;
 }
 
-const RegistrationModal: React.FC<{
-  userRole: UserRole;
-  onClose: () => void;
-  onRegister: (name: string, phone: string, region: string, address: string) => void;
-}> = ({ userRole, onClose, onRegister }) => {
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [region, setRegion] = useState(REGIONS[0]);
-  const [address, setAddress] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+const LoginModal: React.FC<{
+  onClose: () => void;
+  onLogin: (email: string, password: string) => Promise<void>;
+  onShowRegister: () => void;
+}> = ({ onClose, onLogin, onShowRegister }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (name.trim() && phone.trim()) {
-      onRegister(name, phone, region, address);
+    setError('');
+    setIsLoading(true);
+
+    try {
+      await onLogin(email, password);
+    } catch (err: any) {
+      setError(err.message || 'فشل تسجيل الدخول. تحقق من بيانات الاعتماد.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const roleText = userRole === UserRole.Customer ? 'عميل جديد' : 'مزود خدمة جديد';
-  const actionText = userRole === UserRole.Customer ? 'لإضافة طلبك' : 'لإضافة عرضك';
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" onClick={onClose}>
+      <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md" onClick={e => e.stopPropagation()}>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-800">تسجيل الدخول</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              placeholder="example@email.com"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">كلمة المرور</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              placeholder="••••••••"
+            />
+          </div>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-teal-600 text-white font-bold py-3 px-4 rounded-md hover:bg-teal-700 transition-colors disabled:bg-gray-400"
+          >
+            {isLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
+          </button>
+        </form>
+
+        <div className="mt-6 pt-6 border-t text-center">
+          <p className="text-gray-600 mb-3">ليس لديك حساب؟</p>
+          <button
+            onClick={onShowRegister}
+            className="text-teal-600 hover:text-teal-800 font-bold underline"
+          >
+            إنشاء حساب جديد
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SignupModal: React.FC<{
+  onClose: () => void;
+  onSignup: (email: string, password: string, name: string, phone: string, role: UserRole, region: string, address?: string) => Promise<void>;
+  onShowLogin: () => void;
+}> = ({ onClose, onSignup, onShowLogin }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [role, setRole] = useState<UserRole>(UserRole.Customer);
+  const [region, setRegion] = useState(REGIONS[0]);
+  const [address, setAddress] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    try {
+      await onSignup(email, password, name, phone, role, region, role === UserRole.Customer ? address : undefined);
+    } catch (err: any) {
+      setError(err.message || 'فشل إنشاء الحساب. حاول مرة أخرى.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" onClick={onClose}>
-      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-gray-800">تسجيل {roleText}</h2>
+      <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-800">إنشاء حساب جديد</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
         </div>
-        <p className="mb-6 text-gray-600">يرجى إدخال بياناتك للمتابعة. {actionText}, سيتم إنشاء حساب لك تلقائياً.</p>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">الاسم</label>
+            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">نوع الحساب</label>
+            <select
+              id="role"
+              value={role}
+              onChange={e => setRole(e.target.value as UserRole)}
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+            >
+              <option value={UserRole.Customer}>عميل</option>
+              <option value={UserRole.Provider}>مزود خدمة</option>
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">الاسم الكامل</label>
             <input
               type="text"
               id="name"
               value={name}
               onChange={e => setName(e.target.value)}
               required
-              className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
-              placeholder="مثال: أحمد العلي"
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              placeholder="أحمد العلي"
             />
           </div>
+
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">رقم الهاتف</label>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              placeholder="example@email.com"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">كلمة المرور</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+              minLength={6}
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              placeholder="••••••••"
+            />
+            <p className="text-xs text-gray-500 mt-1">ستصلك كلمة المرور على بريدك الإلكتروني</p>
+          </div>
+
+          <div>
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف</label>
             <input
               type="tel"
               id="phone"
               value={phone}
               onChange={e => setPhone(e.target.value)}
               required
-              className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
-              placeholder="مثال: 99xxxxxx"
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              placeholder="99xxxxxx"
             />
           </div>
+
           <div>
-             <label htmlFor="region" className="block text-sm font-medium text-gray-700">المنطقة</label>
-             <select
-                id="region"
-                value={region}
-                onChange={e => setRegion(e.target.value)}
-                className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
-             >
-                {REGIONS.map(r => (
-                    <option key={r} value={r}>{r}</option>
-                ))}
-             </select>
+            <label htmlFor="region" className="block text-sm font-medium text-gray-700 mb-1">المنطقة</label>
+            <select
+              id="region"
+              value={region}
+              onChange={e => setRegion(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+            >
+              {REGIONS.map(r => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
           </div>
-          {userRole === UserRole.Customer && (
-              <div>
-                <label htmlFor="address" className="block text-sm font-medium text-gray-700">العنوان التفصيلي</label>
-                <textarea
-                  id="address"
-                  value={address}
-                  onChange={e => setAddress(e.target.value)}
-                  rows={2}
-                  required
-                  className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
-                  placeholder="القطعة، الشارع، المنزل، رقم الشقة..."
-                />
-                <p className="text-xs text-gray-500 mt-1">سيظهر العنوان فقط لمزود الخدمة الذي تختار عرضه.</p>
-              </div>
+
+          {role === UserRole.Customer && (
+            <div>
+              <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">العنوان التفصيلي</label>
+              <textarea
+                id="address"
+                value={address}
+                onChange={e => setAddress(e.target.value)}
+                required
+                rows={2}
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                placeholder="القطعة، الشارع، المنزل، رقم الشقة..."
+              />
+            </div>
           )}
-          <button type="submit" className="w-full bg-teal-600 text-white font-bold py-2 px-4 rounded-md hover:bg-teal-700 transition-colors">
-            متابعة
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-teal-600 text-white font-bold py-3 px-4 rounded-md hover:bg-teal-700 transition-colors disabled:bg-gray-400"
+          >
+            {isLoading ? 'جاري إنشاء الحساب...' : 'إنشاء حساب'}
           </button>
         </form>
-      </div>
-    </div>
-  );
-};
 
-const UserSelectionModal: React.FC<{
-  users: User[];
-  onSelect: (user: User | null) => void;
-  onClose: () => void;
-}> = ({ users, onSelect, onClose }) => {
-  // Group users by role
-  const admins = users.filter(u => u.role === UserRole.Admin);
-  const customers = users.filter(u => u.role === UserRole.Customer);
-  const providers = users.filter(u => u.role === UserRole.Provider);
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" onClick={onClose}>
-      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-        <div className="flex justify-between items-center mb-4 border-b pb-2">
-          <h2 className="text-2xl font-bold text-gray-800">تسجيل الدخول / تبديل الحساب</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Admins */}
-            <div className="bg-purple-50 rounded-lg p-3 border-2 border-purple-100">
-                <h3 className="font-bold text-purple-800 mb-3 border-b border-purple-200 pb-1 flex items-center gap-2">
-                    <span>🛡️</span> الإدارة (المشرفين)
-                </h3>
-                 {admins.map(u => (
-                    <button key={u.id} onClick={() => onSelect(u)} className="w-full text-right p-3 mb-2 rounded bg-white hover:bg-purple-100 border border-purple-200 shadow-sm transition-colors flex items-center gap-2 group">
-                        <div className="w-8 h-8 bg-purple-100 group-hover:bg-white rounded-full flex items-center justify-center text-purple-600 font-bold transition-colors">
-                            {u.name[0]}
-                        </div>
-                        <div>
-                            <div className="font-bold text-sm text-gray-800">{u.name}</div>
-                            <div className="text-xs text-purple-600 font-semibold">الدخول للوحة التحكم ومتابعة الطلبات</div>
-                        </div>
-                    </button>
-                 ))}
-            </div>
-
-             {/* Providers */}
-            <div className="bg-blue-50 rounded-lg p-3">
-                <h3 className="font-bold text-blue-800 mb-3 border-b border-blue-200 pb-1 flex items-center gap-2">
-                    <span>🛠️</span> مقدمي الخدمات
-                </h3>
-                 {providers.map(u => (
-                    <button key={u.id} onClick={() => onSelect(u)} className="w-full text-right p-3 mb-2 rounded bg-white hover:bg-blue-100 border border-gray-200 shadow-sm transition-colors flex items-center gap-2 group">
-                         <div className="w-8 h-8 bg-blue-100 group-hover:bg-white rounded-full flex items-center justify-center text-blue-600 font-bold transition-colors">
-                            {u.name[0]}
-                        </div>
-                        <div>
-                            <div className="font-bold text-sm text-gray-800">{u.name}</div>
-                            <div className="text-xs text-gray-500">استعراض الطلبات وتقديم عروض</div>
-                        </div>
-                    </button>
-                 ))}
-            </div>
-
-             {/* Customers */}
-            <div className="bg-green-50 rounded-lg p-3">
-                <h3 className="font-bold text-green-800 mb-3 border-b border-green-200 pb-1 flex items-center gap-2">
-                    <span>👤</span> العملاء
-                </h3>
-                 {customers.map(u => (
-                    <button key={u.id} onClick={() => onSelect(u)} className="w-full text-right p-3 mb-2 rounded bg-white hover:bg-green-100 border border-gray-200 shadow-sm transition-colors flex items-center gap-2 group">
-                         <div className="w-8 h-8 bg-green-100 group-hover:bg-white rounded-full flex items-center justify-center text-green-600 font-bold transition-colors">
-                            {u.name[0]}
-                        </div>
-                        <div>
-                            <div className="font-bold text-sm text-gray-800">{u.name}</div>
-                            <div className="text-xs text-gray-500">طلب خدمة جديدة</div>
-                        </div>
-                    </button>
-                 ))}
-            </div>
-        </div>
-
-        <div className="mt-6 pt-4 border-t flex justify-between items-center bg-gray-50 p-4 rounded-lg">
-            <div className="flex items-center gap-2">
-                 <p className="text-sm text-gray-600">أو يمكنك التصفح بدون تسجيل:</p>
-                <button onClick={() => onSelect(null)} className="text-teal-600 hover:text-teal-800 font-bold px-4 py-2 rounded hover:bg-teal-50 border border-teal-200 bg-white shadow-sm">
-                    الدخول كزائر (Guest)
-                </button>
-            </div>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 px-4 py-2 text-sm underline">
-                إلغاء
-            </button>
+        <div className="mt-6 pt-6 border-t text-center">
+          <p className="text-gray-600 mb-3">لديك حساب بالفعل؟</p>
+          <button
+            onClick={onShowLogin}
+            className="text-teal-600 hover:text-teal-800 font-bold underline"
+          >
+            تسجيل الدخول
+          </button>
         </div>
       </div>
     </div>
@@ -215,20 +288,89 @@ const App: React.FC = () => {
   // State to hold a pre-selected category when navigating from Services page to Home
   const [initialHomeCategory, setInitialHomeCategory] = useState<number | undefined>(undefined);
 
-  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
-  const [showUserSelectionModal, setShowUserSelectionModal] = useState(false);
-  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showSignupModal, setShowSignupModal] = useState(false);
 
-  const handleSwitchUser = useCallback(() => {
-    setShowUserSelectionModal(true);
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const authUser = await api.auth.getCurrentUser();
+        if (authUser) {
+          const profile = await api.profiles.getById(authUser.id);
+          if (profile) {
+            const user: User = {
+              id: parseInt(authUser.id.substring(0, 8), 16),
+              name: profile.name,
+              contactInfo: profile.contact_info,
+              role: profile.role as UserRole,
+              region: profile.region,
+              address: profile.address || undefined,
+              registeredAt: new Date(profile.created_at),
+              verificationVideoUrl: profile.verification_video_url || undefined,
+              specializationId: profile.specialization_id || undefined
+            };
+            setCurrentUser(user);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user:', error);
+      }
+    };
+
+    checkAuth();
   }, []);
 
-  const handleUserSelect = (user: User | null) => {
+  const handleSwitchUser = useCallback(() => {
+    setShowLoginModal(true);
+  }, []);
+
+  const handleLogin = async (email: string, password: string) => {
+    try {
+      await api.auth.signIn(email, password);
+      const authUser = await api.auth.getCurrentUser();
+      if (!authUser) throw new Error('فشل تسجيل الدخول');
+
+      const profile = await api.profiles.getById(authUser.id);
+      if (!profile) throw new Error('الملف الشخصي غير موجود');
+
+      const user: User = {
+        id: parseInt(authUser.id.substring(0, 8), 16),
+        name: profile.name,
+        contactInfo: profile.contact_info,
+        role: profile.role as UserRole,
+        region: profile.region,
+        address: profile.address || undefined,
+        registeredAt: new Date(profile.created_at),
+        verificationVideoUrl: profile.verification_video_url || undefined,
+        specializationId: profile.specialization_id || undefined
+      };
+
       setCurrentUser(user);
-      setShowUserSelectionModal(false);
+      setShowLoginModal(false);
       setView('home');
-      setSelectedRequestId(null);
-      setSelectedProfileId(null);
+    } catch (error: any) {
+      throw new Error(error.message || 'فشل تسجيل الدخول');
+    }
+  };
+
+  const handleSignup = async (email: string, password: string, name: string, phone: string, role: UserRole, region: string, address?: string) => {
+    try {
+      await api.auth.signUp(email, password, {
+        name,
+        role,
+        contact_info: phone,
+        region,
+        address: role === UserRole.Customer ? address : undefined,
+        specialization_id: undefined
+      });
+
+      alert(`تم إنشاء الحساب بنجاح!\nتم إرسال رسالة تأكيد إلى: ${email}\nكلمة المرور الخاصة بك: ${password}`);
+
+      setShowSignupModal(false);
+      setShowLoginModal(true);
+    } catch (error: any) {
+      throw new Error(error.message || 'فشل إنشاء الحساب');
+    }
   };
 
   const handleLogout = () => {
@@ -238,31 +380,6 @@ const App: React.FC = () => {
       setSelectedProfileId(null);
   };
 
-  const handleRegisterAndProceed = (name: string, phone: string, region: string, address: string) => {
-      if (!pendingAction) return;
-
-      const newUser: User = {
-          id: Math.max(...allUsers.map(u => u.id), 0) + 1,
-          name,
-          contactInfo: phone,
-          role: pendingAction.type === 'create-request' ? UserRole.Customer : UserRole.Provider,
-          registeredAt: new Date(),
-          region: region,
-          address: pendingAction.type === 'create-request' ? address : undefined
-      };
-
-      setAllUsers(prev => [...prev, newUser]);
-      setCurrentUser(newUser);
-
-      if (pendingAction.type === 'create-request') {
-          _createRequest(newUser.id, pendingAction.payload);
-      } else if (pendingAction.type === 'place-bid') {
-          _placeBid(newUser.id, pendingAction.payload);
-      }
-
-      setShowRegistrationModal(false);
-      setPendingAction(null);
-  };
 
   const addNotification = (userId: number, message: string, type: 'info' | 'success' | 'alert', requestId?: number) => {
       const newNotification: AppNotification = {
@@ -295,11 +412,10 @@ const App: React.FC = () => {
   
   const handleCreateRequest = useCallback((title: string, description: string, categoryId: number, beforeImageUrl: string | null, suggestedBudget?: number, region: string = 'العاصمة') => {
       if (!currentUser) {
-          setPendingAction({ type: 'create-request', payload: { title, description, categoryId, beforeImageUrl, suggestedBudget, region } });
-          setShowRegistrationModal(true);
-      } else {
-          _createRequest(currentUser.id, { title, description, categoryId, beforeImageUrl: beforeImageUrl || undefined, suggestedBudget, region });
+          setShowLoginModal(true);
+          return;
       }
+      _createRequest(currentUser.id, { title, description, categoryId, beforeImageUrl: beforeImageUrl || undefined, suggestedBudget, region });
   }, [currentUser, requests]);
   
   const _placeBid = (providerId: number, {requestId, price, message}: {requestId: number, price: number, message: string}) => {
@@ -327,11 +443,10 @@ const App: React.FC = () => {
 
   const handlePlaceBid = useCallback((requestId: number, price: number, message: string) => {
       if (!currentUser) {
-          setPendingAction({ type: 'place-bid', payload: { requestId, price, message } });
-          setShowRegistrationModal(true);
-      } else {
-         _placeBid(currentUser.id, { requestId, price, message });
+          setShowLoginModal(true);
+          return;
       }
+      _placeBid(currentUser.id, { requestId, price, message });
   }, [currentUser, bids, requests]);
 
 
@@ -562,18 +677,24 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
-      {showRegistrationModal && pendingAction && (
-          <RegistrationModal 
-            userRole={pendingAction.type === 'create-request' ? UserRole.Customer : UserRole.Provider}
-            onClose={() => setShowRegistrationModal(false)}
-            onRegister={handleRegisterAndProceed}
+      {showLoginModal && (
+          <LoginModal
+            onClose={() => setShowLoginModal(false)}
+            onLogin={handleLogin}
+            onShowRegister={() => {
+              setShowLoginModal(false);
+              setShowSignupModal(true);
+            }}
           />
       )}
-      {showUserSelectionModal && (
-          <UserSelectionModal 
-            users={allUsers}
-            onSelect={handleUserSelect}
-            onClose={() => setShowUserSelectionModal(false)}
+      {showSignupModal && (
+          <SignupModal
+            onClose={() => setShowSignupModal(false)}
+            onSignup={handleSignup}
+            onShowLogin={() => {
+              setShowSignupModal(false);
+              setShowLoginModal(true);
+            }}
           />
       )}
       <Header 
