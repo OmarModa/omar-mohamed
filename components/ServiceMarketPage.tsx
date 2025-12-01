@@ -3,6 +3,8 @@ import type { ProviderService, ServicePurchase, PurchaseStatus } from '../types'
 import { supabase } from '../lib/supabase';
 import { CATEGORIES } from '../constants';
 import { WalletIcon, MapPinIcon } from './icons';
+import { WarrantyBadge } from './WarrantySelector';
+import { ProviderPortfolio } from './ProviderPortfolio';
 
 interface ServiceMarketPageProps {
   currentUserUuid: string;
@@ -10,7 +12,7 @@ interface ServiceMarketPageProps {
 }
 
 export const ServiceMarketPage: React.FC<ServiceMarketPageProps> = ({ currentUserUuid, currentUserRole }) => {
-  const [services, setServices] = useState<(ProviderService & { providerName: string; providerRegion: string })[]>([]);
+  const [services, setServices] = useState<(ProviderService & { providerName: string; providerRegion: string; warrantyId: string | null })[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -61,7 +63,8 @@ export const ServiceMarketPage: React.FC<ServiceMarketPageProps> = ({ currentUse
         createdAt: new Date(s.created_at),
         updatedAt: new Date(s.updated_at),
         providerName: s.profiles?.name || 'مزود خدمة',
-        providerRegion: s.profiles?.region || ''
+        providerRegion: s.profiles?.region || '',
+        warrantyId: s.warranty_option_id
       })));
     } catch (err: any) {
       setError(err.message);
@@ -238,6 +241,12 @@ export const ServiceMarketPage: React.FC<ServiceMarketPageProps> = ({ currentUse
                   </div>
 
                   <p className="text-gray-600 mb-4 line-clamp-2">{service.description}</p>
+
+                  {service.warrantyId && (
+                    <div className="mb-3">
+                      <WarrantyBadge warrantyId={service.warrantyId} />
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
                     <MapPinIcon className="w-4 h-4" />

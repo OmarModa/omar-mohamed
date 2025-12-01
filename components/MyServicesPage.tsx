@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import type { ProviderService } from '../types';
 import { supabase } from '../lib/supabase';
 import { CATEGORIES } from '../constants';
+import { WarrantySelector } from './WarrantySelector';
+import { PortfolioManager } from './PortfolioManager';
 
 interface MyServicesPageProps {
   currentUserUuid: string;
@@ -17,7 +19,8 @@ export const MyServicesPage: React.FC<MyServicesPageProps> = ({ currentUserUuid,
     description: '',
     price: '',
     categoryId: '',
-    imageUrl: ''
+    imageUrl: '',
+    warrantyId: null as string | null
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -75,13 +78,14 @@ export const MyServicesPage: React.FC<MyServicesPageProps> = ({ currentUserUuid,
           price: parseFloat(formData.price),
           category_id: parseInt(formData.categoryId),
           image_url: formData.imageUrl || null,
+          warranty_option_id: formData.warrantyId,
           is_active: true
         });
 
       if (insertError) throw insertError;
 
       setSuccess('تم إضافة الخدمة بنجاح!');
-      setFormData({ title: '', description: '', price: '', categoryId: '', imageUrl: '' });
+      setFormData({ title: '', description: '', price: '', categoryId: '', imageUrl: '', warrantyId: null });
       setShowAddForm(false);
       loadServices();
     } catch (err: any) {
@@ -241,6 +245,11 @@ export const MyServicesPage: React.FC<MyServicesPageProps> = ({ currentUserUuid,
                   />
                 </div>
 
+                <WarrantySelector
+                  value={formData.warrantyId}
+                  onChange={(warrantyId) => setFormData({ ...formData, warrantyId })}
+                />
+
                 <div className="flex gap-3">
                   <button
                     type="submit"
@@ -310,6 +319,10 @@ export const MyServicesPage: React.FC<MyServicesPageProps> = ({ currentUserUuid,
             })}
           </div>
         )}
+      </div>
+
+      <div className="mt-8">
+        <PortfolioManager providerId={currentUserUuid} />
       </div>
     </div>
   );
