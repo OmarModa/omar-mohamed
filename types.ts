@@ -84,3 +84,36 @@ export interface AppNotification {
     isRead: boolean;
     createdAt: Date;
 }
+
+export interface ProviderService {
+  id: string;
+  providerId: string;
+  title: string;
+  description: string;
+  price: number;
+  categoryId: number;
+  imageUrl?: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export enum PurchaseStatus {
+  Pending = 'pending',
+  Confirmed = 'confirmed',
+  Completed = 'completed',
+  Cancelled = 'cancelled',
+}
+
+export interface ServicePurchase {
+  id: string;
+  serviceId: string;
+  customerId: string;
+  providerId: string;
+  status: PurchaseStatus;
+  totalPrice: number;
+  notes?: string;
+  scheduledDate?: string;
+  createdAt: Date;
+  completedAt?: Date;
+}

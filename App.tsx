@@ -10,11 +10,14 @@ import { MyProfilePage } from './components/MyProfilePage';
 import { AdminPage } from './components/AdminPage';
 import { ProvidersPage } from './components/ProvidersPage';
 import { ServicesPage } from './components/ServicesPage';
+import { MyServicesPage } from './components/MyServicesPage';
+import { ServiceMarketPage } from './components/ServiceMarketPage';
+import { MyPurchasesPage } from './components/MyPurchasesPage';
 import { UserIcon } from './components/icons';
 import { api } from './lib/api';
 
 
-type View = 'home' | 'details' | 'profile' | 'admin' | 'providers' | 'user-profile' | 'services';
+type View = 'home' | 'details' | 'profile' | 'admin' | 'providers' | 'user-profile' | 'services' | 'my-services' | 'service-market' | 'my-purchases';
 
 interface PendingRequest {
     title: string;
@@ -789,6 +792,27 @@ const App: React.FC = () => {
                     users={allUsers}
                     requests={requests}
                     bids={bids}
+                />
+            );
+        case 'my-services':
+            return currentUser?.role === UserRole.Provider && currentUser.uuid && (
+                <MyServicesPage
+                    currentUserUuid={currentUser.uuid}
+                    currentUserName={currentUser.name}
+                />
+            );
+        case 'service-market':
+            return currentUser && currentUser.uuid && (
+                <ServiceMarketPage
+                    currentUserUuid={currentUser.uuid}
+                    currentUserRole={currentUser.role}
+                />
+            );
+        case 'my-purchases':
+            return currentUser && currentUser.uuid && (
+                <MyPurchasesPage
+                    currentUserUuid={currentUser.uuid}
+                    currentUserRole={currentUser.role}
                 />
             );
         default:

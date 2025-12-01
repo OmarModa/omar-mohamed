@@ -8,7 +8,7 @@ interface HeaderProps {
   currentUser: User | null;
   onSwitchUser: () => void;
   onLogout: () => void;
-  onNavigate: (view: 'home' | 'profile' | 'admin' | 'providers' | 'services') => void;
+  onNavigate: (view: 'home' | 'profile' | 'admin' | 'providers' | 'services' | 'my-services' | 'service-market' | 'my-purchases') => void;
   notifications?: AppNotification[];
   onMarkNotificationRead?: (id: number) => void;
   onViewRequest?: (id: number) => void;
@@ -54,9 +54,22 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onSwitchUser, onLog
                 <button onClick={() => onNavigate('providers')} className="text-gray-600 hover:text-teal-600 font-semibold">
                     مقدمي الخدمات
                 </button>
+                <button onClick={() => onNavigate('service-market')} className="text-gray-600 hover:text-teal-600 font-semibold">
+                    متجر الخدمات
+                </button>
                 {currentUser && currentUser.role !== UserRole.Admin && (
                     <button onClick={() => onNavigate('profile')} className="text-gray-600 hover:text-teal-600 font-semibold">
                         {currentUser.role === UserRole.Customer ? 'طلباتي' : 'أعمالي'}
+                    </button>
+                )}
+                {currentUser?.role === UserRole.Provider && (
+                    <button onClick={() => onNavigate('my-services')} className="text-gray-600 hover:text-teal-600 font-semibold">
+                        خدماتي المعروضة
+                    </button>
+                )}
+                {currentUser && (
+                    <button onClick={() => onNavigate('my-purchases')} className="text-gray-600 hover:text-teal-600 font-semibold">
+                        {currentUser.role === UserRole.Customer ? 'حجوزاتي' : 'طلبات العملاء'}
                     </button>
                 )}
                 {currentUser?.role === UserRole.Admin && (
