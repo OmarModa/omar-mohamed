@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import type { User, ServiceRequest, Bid, Rating, Category } from '../types';
 import { UserRole, RequestStatus } from '../types';
 import { StarIcon, VideoIcon, CheckCircleIcon, MapPinIcon, PhoneIcon } from './icons';
+import { RoleSwitcher } from './RoleSwitcher';
 
 interface MyProfilePageProps {
     viewedUser: User;
@@ -17,6 +18,7 @@ interface MyProfilePageProps {
     onUpdateVideo: (videoUrl: string) => void;
     onUpdateAddress: (address: string) => void;
     onUpdateContact: (phone: string) => void;
+    onRoleChanged?: () => void;
 }
 
 const fileToBase64 = (file: File): Promise<string> => {
@@ -71,7 +73,7 @@ const HistoryRequestCard: React.FC<{
     );
 };
 
-export const MyProfilePage: React.FC<MyProfilePageProps> = ({ viewedUser, currentUser, requests, bids, ratings, users, categories, onViewDetails, getProviderAvgRating, onUpdateVideo, onUpdateAddress, onUpdateContact }) => {
+export const MyProfilePage: React.FC<MyProfilePageProps> = ({ viewedUser, currentUser, requests, bids, ratings, users, categories, onViewDetails, getProviderAvgRating, onUpdateVideo, onUpdateAddress, onUpdateContact, onRoleChanged }) => {
     const [isUploadingVideo, setIsUploadingVideo] = useState(false);
     const [isEditingAddress, setIsEditingAddress] = useState(false);
     const [addressInput, setAddressInput] = useState(viewedUser.address || '');
@@ -129,6 +131,17 @@ export const MyProfilePage: React.FC<MyProfilePageProps> = ({ viewedUser, curren
         const myRequests = requests.filter(r => r.customerId === viewedUser.id).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
         return (
             <div>
+                 {/* Role Switcher */}
+                 {isOwnProfile && viewedUser.uuid && onRoleChanged && (
+                     <div className="mb-6">
+                         <RoleSwitcher
+                             currentRole={viewedUser.role}
+                             currentUserUuid={viewedUser.uuid}
+                             onRoleChanged={onRoleChanged}
+                         />
+                     </div>
+                 )}
+
                  {/* Customer Info Card */}
                  <div className="bg-white p-6 rounded-lg shadow-md mb-6 flex flex-col md:flex-row gap-6 items-start">
                     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-2xl font-bold shrink-0">
@@ -259,6 +272,17 @@ export const MyProfilePage: React.FC<MyProfilePageProps> = ({ viewedUser, curren
 
     return (
         <div>
+            {/* Role Switcher for Provider */}
+            {isOwnProfile && viewedUser.uuid && onRoleChanged && (
+                <div className="mb-6">
+                    <RoleSwitcher
+                        currentRole={viewedUser.role}
+                        currentUserUuid={viewedUser.uuid}
+                        onRoleChanged={onRoleChanged}
+                    />
+                </div>
+            )}
+
             <div className="bg-white p-6 rounded-lg shadow-md mb-8">
                 <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
                     

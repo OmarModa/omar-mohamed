@@ -665,6 +665,36 @@ const App: React.FC = () => {
     }
   }, [currentUser]);
 
+  const handleRoleChanged = useCallback(async () => {
+    try {
+      const authUser = await api.auth.getCurrentUser();
+      if (!authUser) return;
+
+      const profile = await api.profiles.getById(authUser.id);
+      if (!profile) return;
+
+      const updatedUser: User = {
+        id: parseInt(authUser.id.substring(0, 8), 16),
+        uuid: authUser.id,
+        name: profile.name,
+        contactInfo: profile.contact_info,
+        role: profile.role as UserRole,
+        region: profile.region,
+        address: profile.address || undefined,
+        registeredAt: new Date(profile.created_at),
+        verificationVideoUrl: profile.verification_video_url || undefined,
+        specializationId: profile.specialization_id || undefined
+      };
+
+      setCurrentUser(updatedUser);
+      setAllUsers(prev => prev.map(u => u.uuid === authUser.id ? updatedUser : u));
+
+      setView('home');
+    } catch (error) {
+      console.error('Error refreshing user:', error);
+    }
+  }, []);
+
   const handleMarkNotificationRead = useCallback((notificationId: number) => {
       setNotifications(prev => prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n));
   }, []);
@@ -775,6 +805,7 @@ const App: React.FC = () => {
                     onUpdateVideo={(videoUrl) => handleUpdateUserVideo(currentUser.id, videoUrl)}
                     onUpdateAddress={(address) => handleUpdateUserAddress(currentUser.id, address)}
                     onUpdateContact={(phone) => handleUpdateUserContact(currentUser.id, phone)}
+                    onRoleChanged={handleRoleChanged}
                 />
             );
         case 'user-profile':
@@ -793,6 +824,7 @@ const App: React.FC = () => {
                     onUpdateVideo={(videoUrl) => handleUpdateUserVideo(viewedUser.id, videoUrl)}
                     onUpdateAddress={(address) => handleUpdateUserAddress(viewedUser.id, address)}
                     onUpdateContact={(phone) => handleUpdateUserContact(viewedUser.id, phone)}
+                    onRoleChanged={viewedUser.id === currentUser?.id ? handleRoleChanged : undefined}
                 />
             ) : null;
         case 'admin':

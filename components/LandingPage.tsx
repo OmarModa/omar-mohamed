@@ -18,9 +18,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     <div className="min-h-screen bg-white">
       <section className="bg-gradient-to-br from-teal-500 to-teal-700 text-white py-16 px-4">
         <div className="max-w-5xl mx-auto text-center">
+          <div className="inline-block bg-yellow-400 text-gray-800 px-6 py-2 rounded-full font-bold text-sm mb-4 animate-pulse">
+            🎉 المنصة مجانية 100% - بدون عمولات!
+          </div>
           <h1 className="text-5xl font-bold mb-6">مرحباً بك في سوق الخدمات</h1>
           <p className="text-2xl mb-8 opacity-90">
-            منصتك الموثوقة لطلب وتقديم الخدمات في الكويت
+            منصتك الموثوقة لطلب وتقديم الخدمات في الكويت - مجاناً بالكامل
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <button
@@ -143,8 +146,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <WalletIcon className="w-10 h-10 text-blue-600" />
               </div>
-              <h3 className="text-xl font-bold mb-3">أسعار تنافسية</h3>
-              <p className="text-gray-600">مقارنة العروض والأسعار للحصول على أفضل صفقة</p>
+              <h3 className="text-xl font-bold mb-3">مجانية 100%</h3>
+              <p className="text-gray-600">بدون عمولات أو رسوم مخفية - تواصل مباشر بين العميل والمزود</p>
             </div>
 
             <div className="text-center p-6">
