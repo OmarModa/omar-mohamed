@@ -279,22 +279,68 @@ const SignupModal: React.FC<{
 
 
 const App: React.FC = () => {
-  const [allUsers, setAllUsers] = useState<User[]>(USERS);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [requests, setRequests] = useState<ServiceRequest[]>(SERVICE_REQUESTS);
-  const [bids, setBids] = useState<Bid[]>(BIDS);
-  const [ratings, setRatings] = useState<Rating[]>(RATINGS);
-  const [notifications, setNotifications] = useState<AppNotification[]>(NOTIFICATIONS);
+  const [requests, setRequests] = useState<ServiceRequest[]>([]);
+  const [bids, setBids] = useState<Bid[]>([]);
+  const [ratings, setRatings] = useState<Rating[]>([]);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [view, setView] = useState<View>('home');
   const [selectedRequestId, setSelectedRequestId] = useState<number | null>(null);
   const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
-  // State to hold a pre-selected category when navigating from Services page to Home
   const [initialHomeCategory, setInitialHomeCategory] = useState<number | undefined>(undefined);
 
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
   const [pendingRequest, setPendingRequest] = useState<PendingRequest | null>(null);
+
+  const loadData = async () => {
+    try {
+      const [requestsData, bidsData, ratingsData] = await Promise.all([
+        api.requests.getAll(),
+        api.bids.getAll(),
+        api.ratings.getAll()
+      ]);
+
+      setRequests(requestsData.map(r => ({
+        id: parseInt(r.id.toString()),
+        customerId: parseInt(r.customer_id.substring(0, 8), 16),
+        title: r.title,
+        description: r.description,
+        categoryId: r.category_id,
+        region: r.region,
+        status: r.status as RequestStatus,
+        createdAt: new Date(r.created_at),
+        assignedProviderId: r.assigned_provider_id ? parseInt(r.assigned_provider_id.substring(0, 8), 16) : undefined,
+        acceptedBidId: r.accepted_bid_id ? parseInt(r.accepted_bid_id.toString()) : undefined,
+        beforeImageUrl: r.before_image_url || undefined,
+        afterImageUrl: r.after_image_url || undefined,
+        completedAt: r.completed_at ? new Date(r.completed_at) : undefined,
+        suggestedBudget: r.suggested_budget || undefined
+      })));
+
+      setBids(bidsData.map(b => ({
+        id: parseInt(b.id.toString()),
+        requestId: parseInt(b.request_id.toString()),
+        providerId: parseInt(b.provider_id.substring(0, 8), 16),
+        price: b.price,
+        message: b.message || undefined,
+        status: b.status as BidStatus
+      })));
+
+      setRatings(ratingsData.map(r => ({
+        id: parseInt(r.id.toString()),
+        requestId: parseInt(r.request_id.toString()),
+        providerId: parseInt(r.provider_id.substring(0, 8), 16),
+        customerId: parseInt(r.customer_id.substring(0, 8), 16),
+        score: r.score
+      })));
+    } catch (error) {
+      console.error('Error loading data:', error);
+    }
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -305,6 +351,7 @@ const App: React.FC = () => {
           if (profile) {
             const user: User = {
               id: parseInt(authUser.id.substring(0, 8), 16),
+              uuid: authUser.id,
               name: profile.name,
               contactInfo: profile.contact_info,
               role: profile.role as UserRole,
@@ -319,10 +366,16 @@ const App: React.FC = () => {
         }
       } catch (error) {
         console.error('Error loading user:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     checkAuth();
+    loadData();
+
+    const interval = setInterval(loadData, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleSwitchUser = useCallback(() => {
@@ -340,6 +393,7 @@ const App: React.FC = () => {
 
       const user: User = {
         id: parseInt(authUser.id.substring(0, 8), 16),
+        uuid: authUser.id,
         name: profile.name,
         contactInfo: profile.contact_info,
         role: profile.role as UserRole,
@@ -431,30 +485,32 @@ const App: React.FC = () => {
       setNotifications(prev => [newNotification, ...prev]);
   };
   
-  const _createRequest = (customerId: number, {title, description, categoryId, beforeImageUrl, suggestedBudget, region}: {title: string, description: string, categoryId: number, beforeImageUrl?: string, suggestedBudget?: number, region: string}) => {
-      const newRequest: ServiceRequest = {
-        id: Math.max(...requests.map(r => r.id), 0) + 1,
-        customerId,
-        title,
-        description,
-        categoryId,
-        region,
-        status: RequestStatus.Open,
-        createdAt: new Date(),
-        beforeImageUrl: beforeImageUrl || undefined,
-        suggestedBudget: suggestedBudget,
-      };
-      setRequests(prev => [newRequest, ...prev]);
+  const _createRequest = async (customerUuid: string, {title, description, categoryId, beforeImageUrl, suggestedBudget, region}: {title: string, description: string, categoryId: number, beforeImageUrl?: string, suggestedBudget?: number, region: string}) => {
+      try {
+        await api.requests.create({
+          customer_id: customerUuid,
+          title,
+          description,
+          category_id: categoryId,
+          region,
+          before_image_url: beforeImageUrl,
+          suggested_budget: suggestedBudget
+        });
+        await loadData();
+      } catch (error) {
+        console.error('Error creating request:', error);
+        alert('حدث خطأ أثناء إنشاء الطلب');
+      }
   };
   
-  const handleCreateRequest = useCallback((title: string, description: string, categoryId: number, beforeImageUrl: string | null, suggestedBudget?: number, region: string = 'العاصمة') => {
-      if (!currentUser) {
+  const handleCreateRequest = useCallback(async (title: string, description: string, categoryId: number, beforeImageUrl: string | null, suggestedBudget?: number, region: string = 'العاصمة') => {
+      if (!currentUser || !currentUser.uuid) {
           setPendingRequest({ title, description, categoryId, beforeImageUrl, suggestedBudget, region });
           setShowSignupModal(true);
           return;
       }
-      _createRequest(currentUser.id, { title, description, categoryId, beforeImageUrl: beforeImageUrl || undefined, suggestedBudget, region });
-  }, [currentUser, requests]);
+      await _createRequest(currentUser.uuid, { title, description, categoryId, beforeImageUrl: beforeImageUrl || undefined, suggestedBudget, region });
+  }, [currentUser]);
   
   const _placeBid = (providerId: number, {requestId, price, message}: {requestId: number, price: number, message: string}) => {
       const newBid: Bid = {

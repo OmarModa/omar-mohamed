@@ -22,14 +22,15 @@ export enum BidStatus {
 
 export interface User {
   id: number;
+  uuid?: string;
   name: string;
   role: UserRole;
   contactInfo: string;
-  region: string; // Added region
-  address?: string; // Added detailed address
+  region: string;
+  address?: string;
   registeredAt: Date;
-  verificationVideoUrl?: string; 
-  specializationId?: number; 
+  verificationVideoUrl?: string;
+  specializationId?: number;
 }
 
 export interface Category {
