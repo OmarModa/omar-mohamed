@@ -235,12 +235,50 @@ export const HomePage: React.FC<HomePageProps> = ({ currentUser, requests, categ
         return counts;
     }, [requests, activeRegion]);
 
+    const userStats = useMemo(() => {
+        if (!currentUser) return null;
+
+        if (currentUser.role === UserRole.Customer) {
+            const myRequests = requests.filter(r => r.customerId === currentUser.id);
+            return {
+                total: myRequests.length,
+                label: 'طلباتي المفتوحة'
+            };
+        } else if (currentUser.role === UserRole.Provider) {
+            return {
+                total: requests.length,
+                label: 'طلبات متاحة للعروض'
+            };
+        }
+        return null;
+    }, [currentUser, requests]);
+
     return (
         <div>
+            {currentUser && userStats && (
+                <div className="mb-6 bg-gradient-to-r from-teal-500 to-teal-600 rounded-lg shadow-lg p-6 text-white">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h2 className="text-3xl font-bold mb-2">مرحباً، {currentUser.name}</h2>
+                            <p className="opacity-90">
+                                {currentUser.role === UserRole.Customer
+                                    ? 'يمكنك تصفح الطلبات أو إنشاء طلب جديد'
+                                    : 'تصفح الطلبات وقدم عروضك'
+                                }
+                            </p>
+                        </div>
+                        <div className="text-center bg-white bg-opacity-20 rounded-lg px-6 py-4">
+                            <div className="text-4xl font-bold">{userStats.total}</div>
+                            <div className="text-sm opacity-90 mt-1">{userStats.label}</div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {currentUser?.role !== UserRole.Provider && (
-                <NewRequestForm 
-                    categories={categories} 
-                    onCreateRequest={onCreateRequest} 
+                <NewRequestForm
+                    categories={categories}
+                    onCreateRequest={onCreateRequest}
                     initialCategoryId={initialCategoryId}
                 />
             )}

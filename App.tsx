@@ -4,6 +4,7 @@ import { USERS, CATEGORIES, SERVICE_REQUESTS, BIDS, RATINGS, REGIONS, NOTIFICATI
 import type { User, ServiceRequest, Bid, Rating, Category, AppNotification } from './types';
 import { UserRole, RequestStatus, BidStatus } from './types';
 import { Header } from './components/Header';
+import { LandingPage } from './components/LandingPage';
 import { HomePage } from './components/HomePage';
 import { RequestDetails } from './components/RequestDetails';
 import { MyProfilePage } from './components/MyProfilePage';
@@ -17,7 +18,7 @@ import { UserIcon } from './components/icons';
 import { api } from './lib/api';
 
 
-type View = 'home' | 'details' | 'profile' | 'admin' | 'providers' | 'user-profile' | 'services' | 'my-services' | 'service-market' | 'my-purchases';
+type View = 'landing' | 'home' | 'details' | 'profile' | 'admin' | 'providers' | 'user-profile' | 'services' | 'my-services' | 'service-market' | 'my-purchases';
 
 interface PendingRequest {
     title: string;
@@ -284,13 +285,14 @@ const SignupModal: React.FC<{
 const App: React.FC = () => {
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [hasVisitedBefore, setHasVisitedBefore] = useState(false);
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [bids, setBids] = useState<Bid[]>([]);
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [view, setView] = useState<View>('home');
+  const [view, setView] = useState<View>('landing');
   const [selectedRequestId, setSelectedRequestId] = useState<number | null>(null);
   const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
   const [initialHomeCategory, setInitialHomeCategory] = useState<number | undefined>(undefined);
@@ -366,7 +368,11 @@ const App: React.FC = () => {
               specializationId: profile.specialization_id || undefined
             };
             setCurrentUser(user);
+            setHasVisitedBefore(true);
+            setView('home');
           }
+        } else {
+          setView('landing');
         }
       } catch (error) {
         console.error('Error loading user:', error);
@@ -410,6 +416,7 @@ const App: React.FC = () => {
 
       setCurrentUser(user);
       setShowLoginModal(false);
+      setHasVisitedBefore(true);
       setView('home');
     } catch (error: any) {
       throw new Error(error.message || 'فشل تسجيل الدخول');
@@ -707,6 +714,13 @@ const App: React.FC = () => {
 
   const renderContent = () => {
     switch(view) {
+        case 'landing':
+            return <LandingPage
+                        onShowLogin={() => setShowLoginModal(true)}
+                        onShowRegister={() => setShowSignupModal(true)}
+                        onViewServices={() => navigateTo('services')}
+                        onViewMarket={() => navigateTo('service-market')}
+                    />;
         case 'home':
             return <HomePage 
                         currentUser={currentUser}
@@ -843,16 +857,18 @@ const App: React.FC = () => {
             }}
           />
       )}
-      <Header 
-        currentUser={currentUser} 
-        onSwitchUser={handleSwitchUser}
-        onLogout={handleLogout}
-        onNavigate={(view) => navigateTo(view)}
-        notifications={notifications}
-        onMarkNotificationRead={handleMarkNotificationRead}
-        onViewRequest={(id) => navigateTo('details', id)}
-      />
-      <main className="container mx-auto p-4 md:p-6">
+      {view !== 'landing' && (
+        <Header
+          currentUser={currentUser}
+          onSwitchUser={handleSwitchUser}
+          onLogout={handleLogout}
+          onNavigate={(view) => navigateTo(view)}
+          notifications={notifications}
+          onMarkNotificationRead={handleMarkNotificationRead}
+          onViewRequest={(id) => navigateTo('details', id)}
+        />
+      )}
+      <main className={view === 'landing' ? '' : 'container mx-auto p-4 md:p-6'}>
         {renderContent()}
       </main>
     </div>

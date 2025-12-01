@@ -13,6 +13,8 @@ export const ServiceMarketPage: React.FC<ServiceMarketPageProps> = ({ currentUse
   const [services, setServices] = useState<(ProviderService & { providerName: string; providerRegion: string })[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'newest' | 'price-low' | 'price-high'>('newest');
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [selectedService, setSelectedService] = useState<(ProviderService & { providerName: string }) | null>(null);
   const [purchaseForm, setPurchaseForm] = useState({
@@ -106,6 +108,20 @@ export const ServiceMarketPage: React.FC<ServiceMarketPageProps> = ({ currentUse
     setSuccess('');
   };
 
+  const filteredAndSortedServices = services
+    .filter(service => {
+      const matchesSearch = searchQuery === '' ||
+        service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        service.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        service.providerName.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesSearch;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'price-low') return a.price - b.price;
+      if (sortBy === 'price-high') return b.price - a.price;
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    });
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -133,31 +149,73 @@ export const ServiceMarketPage: React.FC<ServiceMarketPageProps> = ({ currentUse
         </div>
       )}
 
+      <div className="bg-white rounded-lg shadow p-4 mb-6">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="ابحث في الخدمات..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500"
+            />
+          </div>
+          <div>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="w-full md:w-48 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500"
+            >
+              <option value="newest">الأحدث</option>
+              <option value="price-low">السعر: من الأقل</option>
+              <option value="price-high">السعر: من الأعلى</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       <div className="mb-6 flex gap-2 flex-wrap">
         <button
           onClick={() => setSelectedCategory(null)}
           className={`px-4 py-2 rounded-lg transition ${!selectedCategory ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
         >
-          الكل
+          الكل ({services.length})
         </button>
-        {CATEGORIES.map(cat => (
-          <button
-            key={cat.id}
-            onClick={() => setSelectedCategory(cat.id)}
-            className={`px-4 py-2 rounded-lg transition ${selectedCategory === cat.id ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-          >
-            {cat.name}
-          </button>
-        ))}
+        {CATEGORIES.map(cat => {
+          const count = services.filter(s => s.categoryId === cat.id).length;
+          return (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`px-4 py-2 rounded-lg transition ${selectedCategory === cat.id ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+            >
+              {cat.name} ({count})
+            </button>
+          );
+        })}
       </div>
 
-      {services.length === 0 ? (
+      {filteredAndSortedServices.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg shadow">
-          <p className="text-xl text-gray-500">لا توجد خدمات متاحة حالياً في هذه الفئة</p>
+          <p className="text-xl text-gray-500 mb-2">
+            {searchQuery ? 'لا توجد نتائج للبحث' : 'لا توجد خدمات متاحة حالياً في هذه الفئة'}
+          </p>
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="text-teal-600 hover:text-teal-700 underline"
+            >
+              مسح البحث
+            </button>
+          )}
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.map(service => {
+        <>
+          <div className="mb-4 text-sm text-gray-600">
+            عرض {filteredAndSortedServices.length} من {services.length} خدمة
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredAndSortedServices.map(service => {
             const category = CATEGORIES.find(c => c.id === service.categoryId);
             const CategoryIcon = category?.icon;
 
@@ -208,7 +266,8 @@ export const ServiceMarketPage: React.FC<ServiceMarketPageProps> = ({ currentUse
               </div>
             );
           })}
-        </div>
+          </div>
+        </>
       )}
 
       {showPurchaseModal && selectedService && (
