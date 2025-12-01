@@ -124,14 +124,15 @@ export const RequestDetails: React.FC<RequestDetailsProps> = (props) => {
         if (!provider) return null;
 
         const avgRating = getProviderAvgRating(provider.id);
+        const isFixedBudget = request.suggestedBudget !== null;
 
         return (
             <div className="border bg-white p-4 rounded-lg flex justify-between items-start">
-                <div>
+                <div className="flex-1">
                     <div className="flex items-center gap-2">
                         <p className="font-bold text-gray-800">{provider.name}</p>
                         {provider.verificationVideoUrl && (
-                            <button 
+                            <button
                                 onClick={() => setViewingVideo(provider.verificationVideoUrl || null)}
                                 className="flex items-center gap-1 text-xs bg-teal-100 text-teal-700 px-2 py-1 rounded-full hover:bg-teal-200 transition-colors"
                                 title="شاهد فيديو التوثيق لهذا المزود"
@@ -150,13 +151,20 @@ export const RequestDetails: React.FC<RequestDetailsProps> = (props) => {
                     {bid.message && <p className="text-gray-600 mt-2 text-sm italic">"{bid.message}"</p>}
                 </div>
                 <div className="text-left flex flex-col items-end">
-                    <p className="text-xl font-bold text-teal-600">{bid.price} د.ك</p>
+                    {isFixedBudget ? (
+                        <div className="flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-lg font-bold">
+                            <span className="text-2xl">✓</span>
+                            <span>موافق</span>
+                        </div>
+                    ) : (
+                        <p className="text-xl font-bold text-teal-600">{bid.price} د.ك</p>
+                    )}
                     {isCustomerOwner && request.status === RequestStatus.Open && (
-                        <button 
+                        <button
                             onClick={() => onAcceptBid(bid)}
-                            className="mt-2 px-3 py-1 bg-green-500 text-white text-sm rounded-md hover:bg-green-600"
+                            className="mt-2 px-4 py-1.5 bg-green-500 text-white text-sm rounded-md hover:bg-green-600 font-semibold"
                         >
-                            قبول العرض
+                            {isFixedBudget ? 'اختيار هذا المزود' : 'قبول العرض'}
                         </button>
                     )}
                 </div>
@@ -250,12 +258,24 @@ export const RequestDetails: React.FC<RequestDetailsProps> = (props) => {
                     <>
                         {request.status === RequestStatus.Open && (
                              <div>
-                                <h2 className="text-xl font-bold text-gray-800 mb-3">العروض المقدمة ({bids.length})</h2>
+                                <h2 className="text-xl font-bold text-gray-800 mb-3">
+                                    {request.suggestedBudget ?
+                                        `مزودو الخدمة الموافقون (${bids.length})` :
+                                        `العروض المقدمة (${bids.length})`
+                                    }
+                                </h2>
                                 {bids.length > 0 ? (
                                     <div className="space-y-4">
                                         {bids.map(bid => <BidCard key={bid.id} bid={bid} />)}
                                     </div>
-                                ) : <p className="text-gray-500 bg-gray-50 p-4 rounded-md">لم يتم تقديم أي عروض بعد.</p>}
+                                ) : (
+                                    <p className="text-gray-500 bg-gray-50 p-4 rounded-md">
+                                        {request.suggestedBudget ?
+                                            'لم يوافق أي مزود خدمة بعد.' :
+                                            'لم يتم تقديم أي عروض بعد.'
+                                        }
+                                    </p>
+                                )}
                             </div>
                         )}
                         
@@ -341,41 +361,65 @@ export const RequestDetails: React.FC<RequestDetailsProps> = (props) => {
                 {(currentUser?.role === UserRole.Provider || !currentUser) && request.status === RequestStatus.Open && !hasProviderBid && (
                      <div className="bg-gray-50 p-6 rounded-lg border mt-8">
                         <h2 className="text-xl font-bold text-gray-800 mb-4">قدم عرضك الآن</h2>
-                        {request.suggestedBudget && (
-                             <div className="mb-4 bg-blue-50 text-blue-800 px-4 py-2 rounded-md border border-blue-200 text-sm font-semibold">
-                                💡 ملاحظة: العميل وضع ميزانية مقترحة قدرها <span className="font-bold text-lg">{request.suggestedBudget} د.ك</span>
+                        {request.suggestedBudget ? (
+                            <div>
+                                <div className="mb-6 bg-gradient-to-r from-blue-50 to-teal-50 px-6 py-4 rounded-lg border-2 border-blue-200 text-center">
+                                    <p className="text-sm text-gray-600 mb-2">الميزانية المحددة من العميل</p>
+                                    <p className="text-4xl font-bold text-teal-700">{request.suggestedBudget} د.ك</p>
+                                </div>
+                                <form onSubmit={(e) => {
+                                    e.preventDefault();
+                                    onPlaceBid(request.id, 0, message || 'موافق على تنفيذ الطلب بالميزانية المحددة');
+                                    setMessage('');
+                                }} className="space-y-4">
+                                    <div>
+                                        <label htmlFor="message" className="block text-sm font-medium text-gray-700">رسالة إضافية (اختياري)</label>
+                                        <textarea
+                                            id="message"
+                                            value={message}
+                                            onChange={(e) => setMessage(e.target.value)}
+                                            rows={3}
+                                            className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+                                            placeholder="يمكنني البدء فوراً بإذن الله..."
+                                        />
+                                    </div>
+                                    <button type="submit" className="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-md hover:bg-green-700 text-lg shadow-md">
+                                        ✓ موافق على تنفيذ الطلب
+                                    </button>
+                                </form>
                             </div>
+                        ) : (
+                            <form onSubmit={handleBidSubmit} className="space-y-4">
+                                <div>
+                                    <label htmlFor="price" className="block text-sm font-medium text-gray-700">السعر (د.ك)</label>
+                                    <input
+                                        type="number"
+                                        id="price"
+                                        value={price}
+                                        onChange={(e) => setPrice(e.target.value)}
+                                        required
+                                        min="0.01"
+                                        step="0.01"
+                                        className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+                                        placeholder="20.00"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="message" className="block text-sm font-medium text-gray-700">رسالة إضافية (اختياري)</label>
+                                    <textarea
+                                        id="message"
+                                        value={message}
+                                        onChange={(e) => setMessage(e.target.value)}
+                                        rows={3}
+                                        className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+                                        placeholder="يمكنني البدء فوراً..."
+                                    />
+                                </div>
+                                <button type="submit" className="w-full bg-teal-600 text-white font-bold py-2 px-4 rounded-md hover:bg-teal-700">
+                                    إرسال العرض
+                                </button>
+                            </form>
                         )}
-                        <form onSubmit={handleBidSubmit} className="space-y-4">
-                            <div>
-                                <label htmlFor="price" className="block text-sm font-medium text-gray-700">السعر (د.ك)</label>
-                                <input
-                                    type="number"
-                                    id="price"
-                                    value={price}
-                                    onChange={(e) => setPrice(e.target.value)}
-                                    required
-                                    min="0.01"
-                                    step="0.01"
-                                    className="mt-1 w-full p-2 border border-gray-300 rounded-md"
-                                    placeholder="20.00"
-                                />
-                            </div>
-                            <div>
-                                <label htmlFor="message" className="block text-sm font-medium text-gray-700">رسالة إضافية (اختياري)</label>
-                                <textarea
-                                    id="message"
-                                    value={message}
-                                    onChange={(e) => setMessage(e.target.value)}
-                                    rows={3}
-                                    className="mt-1 w-full p-2 border border-gray-300 rounded-md"
-                                    placeholder="يمكنني البدء فوراً..."
-                                />
-                            </div>
-                            <button type="submit" className="w-full bg-teal-600 text-white font-bold py-2 px-4 rounded-md hover:bg-teal-700">
-                                إرسال العرض
-                            </button>
-                        </form>
                     </div>
                 )}
             </div>
