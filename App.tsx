@@ -15,6 +15,7 @@ import { MyServicesPage } from './components/MyServicesPage';
 import { ServiceMarketPage } from './components/ServiceMarketPage';
 import { MyPurchasesPage } from './components/MyPurchasesPage';
 import { TermsPage } from './components/TermsPage';
+import { HTTPSRedirect } from './components/HTTPSRedirect';
 import { UserIcon } from './components/icons';
 import { api } from './lib/api';
 
@@ -868,6 +869,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
+      <HTTPSRedirect />
       {showLoginModal && (
           <LoginModal
             onClose={() => setShowLoginModal(false)}
