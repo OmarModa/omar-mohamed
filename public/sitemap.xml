@@ -5,70 +5,70 @@
 
   <!-- Homepage -->
   <url>
-    <loc>https://service-market.kw/</loc>
+    <loc>https://servikw.com/</loc>
     <lastmod>2025-12-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://service-market.kw/" />
-    <xhtml:link rel="alternate" hreflang="ar-KW" href="https://service-market.kw/" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://servikw.com/" />
+    <xhtml:link rel="alternate" hreflang="ar-KW" href="https://servikw.com/" />
   </url>
 
   <!-- About/Landing Page -->
   <url>
-    <loc>https://service-market.kw/landing</loc>
+    <loc>https://servikw.com/landing</loc>
     <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://service-market.kw/landing" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://servikw.com/landing" />
   </url>
 
   <!-- Services Page -->
   <url>
-    <loc>https://service-market.kw/services</loc>
+    <loc>https://servikw.com/services</loc>
     <lastmod>2025-12-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://service-market.kw/services" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://servikw.com/services" />
   </url>
 
   <!-- Service Categories -->
   <url>
-    <loc>https://service-market.kw/services/cars</loc>
+    <loc>https://servikw.com/services/cars</loc>
     <lastmod>2025-12-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://service-market.kw/services/ac</loc>
+    <loc>https://servikw.com/services/ac</loc>
     <lastmod>2025-12-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://service-market.kw/services/electricity</loc>
+    <loc>https://servikw.com/services/electricity</loc>
     <lastmod>2025-12-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://service-market.kw/services/cleaning</loc>
+    <loc>https://servikw.com/services/cleaning</loc>
     <lastmod>2025-12-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://service-market.kw/services/plumbing</loc>
+    <loc>https://servikw.com/services/plumbing</loc>
     <lastmod>2025-12-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://service-market.kw/services/volunteer</loc>
+    <loc>https://servikw.com/services/volunteer</loc>
     <lastmod>2025-12-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -76,55 +76,55 @@
 
   <!-- Providers Page -->
   <url>
-    <loc>https://service-market.kw/providers</loc>
+    <loc>https://servikw.com/providers</loc>
     <lastmod>2025-12-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://service-market.kw/providers" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://servikw.com/providers" />
   </url>
 
   <!-- Service Market Page -->
   <url>
-    <loc>https://service-market.kw/service-market</loc>
+    <loc>https://servikw.com/service-market</loc>
     <lastmod>2025-12-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://service-market.kw/service-market" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://servikw.com/service-market" />
   </url>
 
   <!-- Terms and Conditions -->
   <url>
-    <loc>https://service-market.kw/terms</loc>
+    <loc>https://servikw.com/terms</loc>
     <lastmod>2025-12-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://service-market.kw/terms" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://servikw.com/terms" />
   </url>
 
   <!-- Regions -->
   <url>
-    <loc>https://service-market.kw/region/capital</loc>
+    <loc>https://servikw.com/region/capital</loc>
     <lastmod>2025-12-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://service-market.kw/region/hawalli</loc>
+    <loc>https://servikw.com/region/hawalli</loc>
     <lastmod>2025-12-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://service-market.kw/region/salmiya</loc>
+    <loc>https://servikw.com/region/salmiya</loc>
     <lastmod>2025-12-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://service-market.kw/region/farwaniya</loc>
+    <loc>https://servikw.com/region/farwaniya</loc>
     <lastmod>2025-12-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>

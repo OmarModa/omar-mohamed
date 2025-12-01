@@ -59,7 +59,7 @@ User-agent: Applebot
 Allow: /
 
 # Sitemap
-Sitemap: https://service-market.kw/sitemap.xml
+Sitemap: https://servikw.com/sitemap.xml
 
 # Crawl-delay for politeness
 Crawl-delay: 1
