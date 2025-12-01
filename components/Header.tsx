@@ -85,11 +85,11 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onSwitchUser, onLog
                         {/* Notifications Dropdown */}
                         {showNotifications && (
                             <>
-                                <div 
-                                    className="fixed inset-0 z-10" 
+                                <div
+                                    className="fixed inset-0 z-10"
                                     onClick={() => setShowNotifications(false)}
                                 ></div>
-                                <div className="absolute left-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-100 z-20 overflow-hidden">
+                                <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-lg shadow-xl border border-gray-100 z-20 overflow-hidden">
                                     <div className="p-3 border-b bg-gray-50 flex justify-between items-center">
                                         <h3 className="font-bold text-gray-700">الإشعارات</h3>
                                         <span className="text-xs text-gray-500">{userNotifications.length} إشعار</span>
@@ -97,7 +97,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onSwitchUser, onLog
                                     <div className="max-h-80 overflow-y-auto">
                                         {userNotifications.length > 0 ? (
                                             userNotifications.map(notification => (
-                                                <div 
+                                                <div
                                                     key={notification.id}
                                                     onClick={() => handleNotificationClick(notification)}
                                                     className={`p-3 border-b last:border-0 hover:bg-gray-50 cursor-pointer transition-colors ${!notification.isRead ? 'bg-blue-50' : ''}`}
