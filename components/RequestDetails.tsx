@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import type { ServiceRequest, User, Bid, Category } from '../types';
 import { UserRole, RequestStatus } from '../types';
 import { StarRating } from './StarRating';
-import { StarIcon } from './icons';
+import { StarIcon, VideoIcon, WalletIcon, MapPinIcon } from './icons';
 
 interface RequestDetailsProps {
     request: ServiceRequest;
@@ -90,6 +90,7 @@ export const RequestDetails: React.FC<RequestDetailsProps> = (props) => {
     const [price, setPrice] = useState('');
     const [message, setMessage] = useState('');
     const [rating, setRating] = useState(0);
+    const [viewingVideo, setViewingVideo] = useState<string | null>(null);
 
     const handleBidSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -127,7 +128,19 @@ export const RequestDetails: React.FC<RequestDetailsProps> = (props) => {
         return (
             <div className="border bg-white p-4 rounded-lg flex justify-between items-start">
                 <div>
-                    <p className="font-bold text-gray-800">{provider.name}</p>
+                    <div className="flex items-center gap-2">
+                        <p className="font-bold text-gray-800">{provider.name}</p>
+                        {provider.verificationVideoUrl && (
+                            <button 
+                                onClick={() => setViewingVideo(provider.verificationVideoUrl || null)}
+                                className="flex items-center gap-1 text-xs bg-teal-100 text-teal-700 px-2 py-1 rounded-full hover:bg-teal-200 transition-colors"
+                                title="شاهد فيديو التوثيق لهذا المزود"
+                            >
+                                <VideoIcon className="w-3 h-3" />
+                                <span>فيديو موثق</span>
+                            </button>
+                        )}
+                    </div>
                     {avgRating > 0 && (
                         <div className="flex items-center text-sm text-gray-500 mt-1">
                             <StarIcon className="w-4 h-4 text-yellow-400 me-1" />
@@ -136,7 +149,7 @@ export const RequestDetails: React.FC<RequestDetailsProps> = (props) => {
                     )}
                     {bid.message && <p className="text-gray-600 mt-2 text-sm italic">"{bid.message}"</p>}
                 </div>
-                <div className="text-left">
+                <div className="text-left flex flex-col items-end">
                     <p className="text-xl font-bold text-teal-600">{bid.price} د.ك</p>
                     {isCustomerOwner && request.status === RequestStatus.Open && (
                         <button 
@@ -153,6 +166,27 @@ export const RequestDetails: React.FC<RequestDetailsProps> = (props) => {
 
     return (
         <div className="bg-white rounded-lg shadow-xl p-6 md:p-8 max-w-4xl mx-auto">
+            {/* Video Modal */}
+            {viewingVideo && (
+                <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50" onClick={() => setViewingVideo(null)}>
+                    <div className="bg-white p-4 rounded-lg max-w-2xl w-full m-4 relative" onClick={e => e.stopPropagation()}>
+                        <button 
+                            onClick={() => setViewingVideo(null)}
+                            className="absolute -top-10 left-0 text-white hover:text-gray-300 text-2xl"
+                        >
+                            إغلاق &times;
+                        </button>
+                        <h3 className="text-lg font-bold mb-2 text-gray-800">فيديو تعريف المزود</h3>
+                        <div className="relative pt-[56.25%] bg-black rounded">
+                             <video controls autoPlay className="absolute top-0 left-0 w-full h-full rounded">
+                                <source src={viewingVideo} type="video/mp4" />
+                                متصفحك لا يدعم تشغيل الفيديو.
+                            </video>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Header section */}
             <div className="border-b pb-4 mb-6">
                 <div className="flex justify-between items-start">
@@ -168,9 +202,23 @@ export const RequestDetails: React.FC<RequestDetailsProps> = (props) => {
                             مقدم من <span className="font-medium">{customer?.name || 'غير معروف'}</span>
                         </p>
                     </div>
-                    {renderStatusBadge()}
+                    <div className="flex flex-col items-end gap-2">
+                         {renderStatusBadge()}
+                         {/* Budget Display in Details */}
+                         {request.suggestedBudget ? (
+                            <div className="flex items-center gap-1 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-bold">
+                                <WalletIcon className="w-4 h-4" />
+                                <span>ميزانية: {request.suggestedBudget} د.ك</span>
+                            </div>
+                         ) : (
+                            <div className="flex items-center gap-1 bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm font-semibold">
+                                <WalletIcon className="w-4 h-4" />
+                                <span>بانتظار العروض</span>
+                            </div>
+                         )}
+                    </div>
                 </div>
-                <p className="text-gray-700 mt-4 whitespace-pre-wrap">{request.description}</p>
+                <p className="text-gray-700 mt-4 whitespace-pre-wrap leading-relaxed">{request.description}</p>
             </div>
             
              {/* Before and After Images */}
@@ -214,7 +262,16 @@ export const RequestDetails: React.FC<RequestDetailsProps> = (props) => {
                         {request.status === RequestStatus.Assigned && assignedProvider && (
                             <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                                 <h2 className="text-xl font-bold text-gray-800 mb-2">الخدمة قيد التنفيذ</h2>
-                                <p>تم إسناد الطلب إلى: <span className="font-bold">{assignedProvider.name}</span></p>
+                                <p className="mb-2">تم إسناد الطلب إلى: <span className="font-bold">{assignedProvider.name}</span></p>
+                                {assignedProvider.verificationVideoUrl && (
+                                     <button 
+                                        onClick={() => setViewingVideo(assignedProvider.verificationVideoUrl || null)}
+                                        className="mb-3 flex items-center gap-2 text-sm bg-teal-600 text-white px-3 py-1.5 rounded-md hover:bg-teal-700 transition-colors"
+                                    >
+                                        <VideoIcon className="w-4 h-4" />
+                                        شاهد فيديو المزود
+                                    </button>
+                                )}
                                 <p>للتواصل: <span className="font-bold">{assignedProvider.contactInfo}</span></p>
                                 <button onClick={() => onCompleteRequest(request.id)} className="mt-4 w-full bg-teal-600 text-white font-bold py-2 px-4 rounded-md hover:bg-teal-700">
                                     تأكيد إتمام الخدمة
@@ -244,14 +301,28 @@ export const RequestDetails: React.FC<RequestDetailsProps> = (props) => {
                 {isProviderAssigned && request.status === RequestStatus.Assigned && customer && (
                      <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
                         <h2 className="text-xl font-bold text-gray-800 mb-2">معلومات العميل</h2>
-                        <p>اسم العميل: <span className="font-bold">{customer.name}</span></p>
-                        <p>للتواصل: <span className="font-bold">{customer.contactInfo}</span></p>
+                        <div className="space-y-2">
+                            <p>اسم العميل: <span className="font-bold">{customer.name}</span></p>
+                            <p>للتواصل: <span className="font-bold">{customer.contactInfo}</span></p>
+                            
+                            {/* Address Display for Assigned Provider */}
+                            <div className="mt-3 p-3 bg-white rounded border border-yellow-300">
+                                <h3 className="font-bold text-gray-700 text-sm mb-1 flex items-center gap-1">
+                                    <MapPinIcon className="w-4 h-4 text-gray-500" />
+                                    عنوان العمل:
+                                </h3>
+                                <p className="text-gray-800 whitespace-pre-line leading-snug">
+                                    {customer.address ? customer.address : 'لم يقم العميل بتحديد العنوان التفصيلي بعد.'}
+                                </p>
+                            </div>
+                        </div>
+                        
                         {!request.afterImageUrl && <AfterImageUpload requestId={request.id} onUpload={onUploadAfterImage} />}
                     </div>
                 )}
                  
                  {/* --- Public/Other Provider View --- */}
-                {!isCustomerOwner && request.status === RequestStatus.Assigned && assignedProvider && (
+                {!isCustomerOwner && request.status === RequestStatus.Assigned && assignedProvider && !isProviderAssigned && (
                      <div className="bg-gray-50 p-4 rounded-lg border">
                         <h2 className="text-xl font-bold text-gray-800 mb-2">تم إسناد الطلب</h2>
                         <p>هذا الطلب قيد التنفيذ بواسطة <span className="font-bold">{assignedProvider.name}</span>.</p>
@@ -270,6 +341,11 @@ export const RequestDetails: React.FC<RequestDetailsProps> = (props) => {
                 {(currentUser?.role === UserRole.Provider || !currentUser) && request.status === RequestStatus.Open && !hasProviderBid && (
                      <div className="bg-gray-50 p-6 rounded-lg border mt-8">
                         <h2 className="text-xl font-bold text-gray-800 mb-4">قدم عرضك الآن</h2>
+                        {request.suggestedBudget && (
+                             <div className="mb-4 bg-blue-50 text-blue-800 px-4 py-2 rounded-md border border-blue-200 text-sm font-semibold">
+                                💡 ملاحظة: العميل وضع ميزانية مقترحة قدرها <span className="font-bold text-lg">{request.suggestedBudget} د.ك</span>
+                            </div>
+                        )}
                         <form onSubmit={handleBidSubmit} className="space-y-4">
                             <div>
                                 <label htmlFor="price" className="block text-sm font-medium text-gray-700">السعر (د.ك)</label>

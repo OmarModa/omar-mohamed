@@ -1,3 +1,4 @@
+
 // Fix: Import ComponentType to resolve 'Cannot find namespace React' error.
 import type { ComponentType } from 'react';
 
@@ -24,7 +25,11 @@ export interface User {
   name: string;
   role: UserRole;
   contactInfo: string;
+  region: string; // Added region
+  address?: string; // Added detailed address
   registeredAt: Date;
+  verificationVideoUrl?: string; 
+  specializationId?: number; 
 }
 
 export interface Category {
@@ -40,12 +45,15 @@ export interface ServiceRequest {
   title: string;
   description: string;
   categoryId: number;
+  region: string; // Added region
   status: RequestStatus;
   createdAt: Date;
   assignedProviderId?: number;
   acceptedBidId?: number;
   beforeImageUrl?: string;
   afterImageUrl?: string;
+  completedAt?: Date; 
+  suggestedBudget?: number; 
 }
 
 export interface Bid {
@@ -63,4 +71,14 @@ export interface Rating {
   providerId: number;
   customerId: number;
   score: number; // 1 to 10
+}
+
+export interface AppNotification {
+    id: number;
+    userId: number; // The recipient
+    message: string;
+    type: 'info' | 'success' | 'alert';
+    relatedRequestId?: number;
+    isRead: boolean;
+    createdAt: Date;
 }
