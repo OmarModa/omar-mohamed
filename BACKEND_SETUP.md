@@ -15,15 +15,32 @@ This service marketplace uses Supabase as the backend, providing:
 
 1. **profiles** - User profiles (customers, providers, admins)
 2. **categories** - Service categories
-3. **service_requests** - Customer service requests
-4. **bids** - Provider bids on requests
+3. **service_requests** - Customer service requests with fixed budget support
+4. **bids** - Provider bids on requests (supports both price bids and acceptance bids)
 5. **ratings** - Service ratings (1-10 scale)
 6. **notifications** - User notifications
+
+### Fixed Budget vs Open Bidding
+
+The system supports two types of service requests:
+
+**Fixed Budget (suggested_budget is set):**
+- Customer specifies a fixed budget for the service
+- Providers can only accept the fixed budget (no custom price)
+- Multiple providers can send acceptance ("موافق")
+- Customer chooses from providers who accepted
+- Provider contact info is revealed after acceptance
+
+**Open Bidding (suggested_budget is null):**
+- Customer doesn't specify a budget
+- Providers submit custom price bids
+- Customer reviews all bids and chooses one
+- Traditional bidding system
 
 ### Automatic Features
 
 - **Notifications**: Automatically created when:
-  - New bid is placed (notifies customer)
+  - New bid is placed (notifies customer with appropriate message)
   - Bid is accepted (notifies provider)
   - Request is completed (notifies customer)
 
@@ -31,6 +48,7 @@ This service marketplace uses Supabase as the backend, providing:
   - Users can only update their own data
   - Customers control their requests
   - Providers can only update assigned requests
+  - Provider contact info only revealed after assignment
   - All data properly secured
 
 ## Setup Instructions
@@ -131,13 +149,24 @@ await api.requests.acceptBid(requestId, bidId, providerId);
 // Get bids for a request
 const bids = await api.bids.getByRequestId(requestId);
 
-// Create bid
+// Create a price bid (for open bidding requests)
 const bid = await api.bids.create({
   request_id: requestId,
   provider_id: providerId,
   price: 25.50,
   message: 'Optional message'
 });
+
+// Create an acceptance bid (for fixed budget requests)
+const acceptanceBid = await api.bids.createAcceptance(
+  requestId,
+  providerId,
+  'موافق على تنفيذ الطلب بالميزانية المحددة' // optional message
+);
+
+// Get provider contact info (only available after bid is accepted)
+const providerInfo = await api.requests.getProviderContactInfo(requestId, customerId);
+// Returns: { provider_id, provider_name, contact_info, region, address, specialization_id }
 ```
 
 ### Ratings

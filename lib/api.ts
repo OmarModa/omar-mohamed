@@ -194,6 +194,17 @@ export const api = {
       if (rejectError) throw rejectError;
     },
 
+    async getProviderContactInfo(requestId: number, customerId: string) {
+      const { data, error } = await supabase
+        .rpc('get_provider_contact_info', {
+          p_request_id: requestId,
+          p_customer_id: customerId,
+        });
+
+      if (error) throw error;
+      return data?.[0] || null;
+    },
+
     async complete(id: number) {
       const { data, error } = await supabase
         .from('service_requests')
@@ -226,6 +237,22 @@ export const api = {
       const { data, error } = await supabase
         .from('bids')
         .insert(bid)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as Bid;
+    },
+
+    async createAcceptance(requestId: number, providerId: string, message?: string) {
+      const { data, error } = await supabase
+        .from('bids')
+        .insert({
+          request_id: requestId,
+          provider_id: providerId,
+          price: null,
+          message: message || 'موافق على تنفيذ الطلب بالميزانية المحددة',
+        })
         .select()
         .single();
 

@@ -78,6 +78,7 @@ export interface Database {
           before_image_url: string | null
           after_image_url: string | null
           suggested_budget: number | null
+          is_fixed_budget: boolean | null
           created_at: string
           completed_at: string | null
         }
@@ -117,7 +118,7 @@ export interface Database {
           id: number
           request_id: number
           provider_id: string
-          price: number
+          price: number | null
           message: string | null
           status: 'pending' | 'accepted' | 'rejected'
           created_at: string
@@ -125,7 +126,7 @@ export interface Database {
         Insert: {
           request_id: number
           provider_id: string
-          price: number
+          price?: number | null
           message?: string | null
           status?: 'pending' | 'accepted' | 'rejected'
           created_at?: string
@@ -133,7 +134,7 @@ export interface Database {
         Update: {
           request_id?: number
           provider_id?: string
-          price?: number
+          price?: number | null
           message?: string | null
           status?: 'pending' | 'accepted' | 'rejected'
           created_at?: string
@@ -200,6 +201,20 @@ export interface Database {
           p_related_request_id?: number
         }
         Returns: void
+      }
+      get_provider_contact_info: {
+        Args: {
+          p_request_id: number
+          p_customer_id: string
+        }
+        Returns: {
+          provider_id: string
+          provider_name: string
+          contact_info: string
+          region: string
+          address: string | null
+          specialization_id: number | null
+        }[]
       }
     }
   }
