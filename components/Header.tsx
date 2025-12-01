@@ -125,19 +125,24 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onSwitchUser, onLog
 
                 {currentUser ? (
                     <div className="flex items-center gap-2 bg-gray-100 p-2 rounded-lg">
-                        <UserIcon className="w-6 h-6 text-gray-500" />
-                        <div className="text-sm">
-                            <span className="font-semibold">{currentUser.name}</span>
-                            <span className={`text-xs block ${
-                                currentUser.role === UserRole.Provider ? 'text-blue-600' :
-                                currentUser.role === UserRole.Customer ? 'text-green-600' : 'text-purple-600'
-                            }`}>
-                                {
-                                 currentUser.role === UserRole.Provider ? 'مزود خدمة' :
-                                 currentUser.role === UserRole.Customer ? 'عميل' : 'مشرف'
-                                }
-                            </span>
-                        </div>
+                        <button
+                            onClick={() => onNavigate('profile')}
+                            className="flex items-center gap-2 hover:bg-gray-200 rounded-lg p-1 transition-colors"
+                        >
+                            <UserIcon className="w-6 h-6 text-gray-500" />
+                            <div className="text-sm">
+                                <span className="font-semibold">{currentUser.name}</span>
+                                <span className={`text-xs block ${
+                                    currentUser.role === UserRole.Provider ? 'text-blue-600' :
+                                    currentUser.role === UserRole.Customer ? 'text-green-600' : 'text-purple-600'
+                                }`}>
+                                    {
+                                     currentUser.role === UserRole.Provider ? 'مزود خدمة' :
+                                     currentUser.role === UserRole.Customer ? 'عميل' : 'مشرف'
+                                    }
+                                </span>
+                            </div>
+                        </button>
                          <button onClick={onLogout} className="ms-2 px-3 py-1 bg-red-500 text-white rounded-md text-xs hover:bg-red-600 transition-colors">
                             خروج
                         </button>
