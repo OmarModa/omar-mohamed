@@ -138,10 +138,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onSwitchUser, onLog
                                 }
                             </span>
                         </div>
-                        <button onClick={onSwitchUser} className="ms-2 px-3 py-1 bg-gray-500 text-white rounded-md text-xs hover:bg-gray-600 transition-colors">
-                            تبديل
-                        </button>
-                         <button onClick={onLogout} className="px-3 py-1 bg-red-500 text-white rounded-md text-xs hover:bg-red-600 transition-colors">
+                         <button onClick={onLogout} className="ms-2 px-3 py-1 bg-red-500 text-white rounded-md text-xs hover:bg-red-600 transition-colors">
                             خروج
                         </button>
                     </div>

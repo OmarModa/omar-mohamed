@@ -16,9 +16,13 @@ import { api } from './lib/api';
 
 type View = 'home' | 'details' | 'profile' | 'admin' | 'providers' | 'user-profile' | 'services';
 
-interface PendingAction {
-    type: 'create-request' | 'place-bid';
-    payload: any;
+interface PendingRequest {
+    title: string;
+    description: string;
+    categoryId: number;
+    beforeImageUrl: string | null;
+    suggestedBudget?: number;
+    region: string;
 }
 
 
@@ -290,6 +294,7 @@ const App: React.FC = () => {
 
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
+  const [pendingRequest, setPendingRequest] = useState<PendingRequest | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -364,10 +369,42 @@ const App: React.FC = () => {
         specialization_id: undefined
       });
 
-      alert(`تم إنشاء الحساب بنجاح!\nتم إرسال رسالة تأكيد إلى: ${email}\nكلمة المرور الخاصة بك: ${password}`);
+      try {
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+        await fetch(`${supabaseUrl}/functions/v1/send-password-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseAnonKey}`
+          },
+          body: JSON.stringify({ email, password, name })
+        });
+      } catch (emailError) {
+        console.error('Failed to send email:', emailError);
+      }
+
+      alert(`تم إنشاء الحساب بنجاح!\nتم إرسال كلمة المرور على البريد الإلكتروني: ${email}\n\nللتجربة، استخدم:\nالبريد: ${email}\nكلمة المرور: ${password}`);
+
+      await handleLogin(email, password);
+
+      if (pendingRequest && role === UserRole.Customer) {
+        const authUser = await api.auth.getCurrentUser();
+        if (authUser) {
+          await api.requests.create({
+            customer_id: authUser.id,
+            title: pendingRequest.title,
+            description: pendingRequest.description,
+            category_id: pendingRequest.categoryId,
+            region: pendingRequest.region,
+            before_image_url: pendingRequest.beforeImageUrl || undefined,
+            suggested_budget: pendingRequest.suggestedBudget
+          });
+          setPendingRequest(null);
+        }
+      }
 
       setShowSignupModal(false);
-      setShowLoginModal(true);
     } catch (error: any) {
       throw new Error(error.message || 'فشل إنشاء الحساب');
     }
@@ -412,7 +449,8 @@ const App: React.FC = () => {
   
   const handleCreateRequest = useCallback((title: string, description: string, categoryId: number, beforeImageUrl: string | null, suggestedBudget?: number, region: string = 'العاصمة') => {
       if (!currentUser) {
-          setShowLoginModal(true);
+          setPendingRequest({ title, description, categoryId, beforeImageUrl, suggestedBudget, region });
+          setShowSignupModal(true);
           return;
       }
       _createRequest(currentUser.id, { title, description, categoryId, beforeImageUrl: beforeImageUrl || undefined, suggestedBudget, region });
