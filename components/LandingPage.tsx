@@ -6,13 +6,15 @@ interface LandingPageProps {
   onShowRegister: () => void;
   onViewServices: () => void;
   onViewMarket: () => void;
+  onViewTerms?: () => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({
   onShowLogin,
   onShowRegister,
   onViewServices,
-  onViewMarket
+  onViewMarket,
+  onViewTerms
 }) => {
   return (
     <div className="min-h-screen bg-white">
@@ -177,9 +179,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       <footer className="bg-gray-800 text-white py-8 px-4">
-        <div className="max-w-6xl mx-auto text-center">
-          <h3 className="text-2xl font-bold mb-2">سوق الخدمات</h3>
-          <p className="text-gray-400">منصة موثوقة لربط العملاء بمزودي الخدمات في الكويت</p>
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-6">
+            <h3 className="text-2xl font-bold mb-2">سوق الخدمات</h3>
+            <p className="text-gray-400">منصة موثوقة لربط العملاء بمزودي الخدمات في الكويت</p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-4 pt-4 border-t border-gray-700">
+            {onViewTerms && (
+              <button
+                onClick={onViewTerms}
+                className="text-gray-300 hover:text-white transition underline"
+              >
+                الشروط والأحكام
+              </button>
+            )}
+            <span className="text-gray-500">|</span>
+            <span className="text-gray-300">
+              جميع الحقوق محفوظة © {new Date().getFullYear()}
+            </span>
+          </div>
         </div>
       </footer>
     </div>

@@ -14,11 +14,12 @@ import { ServicesPage } from './components/ServicesPage';
 import { MyServicesPage } from './components/MyServicesPage';
 import { ServiceMarketPage } from './components/ServiceMarketPage';
 import { MyPurchasesPage } from './components/MyPurchasesPage';
+import { TermsPage } from './components/TermsPage';
 import { UserIcon } from './components/icons';
 import { api } from './lib/api';
 
 
-type View = 'landing' | 'home' | 'details' | 'profile' | 'admin' | 'providers' | 'user-profile' | 'services' | 'my-services' | 'service-market' | 'my-purchases';
+type View = 'landing' | 'home' | 'details' | 'profile' | 'admin' | 'providers' | 'user-profile' | 'services' | 'my-services' | 'service-market' | 'my-purchases' | 'terms';
 
 interface PendingRequest {
     title: string;
@@ -745,6 +746,7 @@ const App: React.FC = () => {
                         onShowRegister={() => setShowSignupModal(true)}
                         onViewServices={() => navigateTo('services')}
                         onViewMarket={() => navigateTo('service-market')}
+                        onViewTerms={() => navigateTo('terms')}
                     />;
         case 'home':
             return <HomePage 
@@ -856,6 +858,8 @@ const App: React.FC = () => {
                     currentUserRole={currentUser.role}
                 />
             );
+        case 'terms':
+            return <TermsPage />;
         default:
             return null;
     }
