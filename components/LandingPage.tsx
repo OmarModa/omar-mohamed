@@ -15,8 +15,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onViewMarket
 }) => {
   return (
-    <div className="min-h-screen">
-      <section className="bg-gradient-to-br from-teal-500 to-teal-700 text-white py-20 px-4">
+    <div className="min-h-screen bg-white">
+      <section className="bg-gradient-to-br from-teal-500 to-teal-700 text-white py-16 px-4">
         <div className="max-w-5xl mx-auto text-center">
           <h1 className="text-5xl font-bold mb-6">مرحباً بك في سوق الخدمات</h1>
           <p className="text-2xl mb-8 opacity-90">

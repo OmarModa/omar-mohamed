@@ -8,7 +8,7 @@ interface HeaderProps {
   currentUser: User | null;
   onSwitchUser: () => void;
   onLogout: () => void;
-  onNavigate: (view: 'home' | 'profile' | 'admin' | 'providers' | 'services' | 'my-services' | 'service-market' | 'my-purchases') => void;
+  onNavigate: (view: 'home' | 'profile' | 'admin' | 'providers' | 'services' | 'my-services' | 'service-market' | 'my-purchases' | 'landing') => void;
   notifications?: AppNotification[];
   onMarkNotificationRead?: (id: number) => void;
   onViewRequest?: (id: number) => void;
@@ -56,6 +56,9 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onSwitchUser, onLog
                 </button>
                 <button onClick={() => onNavigate('service-market')} className="text-gray-600 hover:text-teal-600 font-semibold">
                     متجر الخدمات
+                </button>
+                <button onClick={() => onNavigate('landing')} className="text-gray-600 hover:text-teal-600 font-semibold">
+                    عن المنصة
                 </button>
                 {currentUser && currentUser.role !== UserRole.Admin && (
                     <button onClick={() => onNavigate('profile')} className="text-gray-600 hover:text-teal-600 font-semibold">

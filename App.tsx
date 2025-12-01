@@ -285,14 +285,13 @@ const SignupModal: React.FC<{
 const App: React.FC = () => {
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [hasVisitedBefore, setHasVisitedBefore] = useState(false);
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [bids, setBids] = useState<Bid[]>([]);
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [view, setView] = useState<View>('landing');
+  const [view, setView] = useState<View>('home');
   const [selectedRequestId, setSelectedRequestId] = useState<number | null>(null);
   const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
   const [initialHomeCategory, setInitialHomeCategory] = useState<number | undefined>(undefined);
@@ -368,11 +367,8 @@ const App: React.FC = () => {
               specializationId: profile.specialization_id || undefined
             };
             setCurrentUser(user);
-            setHasVisitedBefore(true);
             setView('home');
           }
-        } else {
-          setView('landing');
         }
       } catch (error) {
         console.error('Error loading user:', error);
@@ -416,7 +412,6 @@ const App: React.FC = () => {
 
       setCurrentUser(user);
       setShowLoginModal(false);
-      setHasVisitedBefore(true);
       setView('home');
     } catch (error: any) {
       throw new Error(error.message || 'فشل تسجيل الدخول');
@@ -857,18 +852,16 @@ const App: React.FC = () => {
             }}
           />
       )}
-      {view !== 'landing' && (
-        <Header
-          currentUser={currentUser}
-          onSwitchUser={handleSwitchUser}
-          onLogout={handleLogout}
-          onNavigate={(view) => navigateTo(view)}
-          notifications={notifications}
-          onMarkNotificationRead={handleMarkNotificationRead}
-          onViewRequest={(id) => navigateTo('details', id)}
-        />
-      )}
-      <main className={view === 'landing' ? '' : 'container mx-auto p-4 md:p-6'}>
+      <Header
+        currentUser={currentUser}
+        onSwitchUser={handleSwitchUser}
+        onLogout={handleLogout}
+        onNavigate={(view) => navigateTo(view)}
+        notifications={notifications}
+        onMarkNotificationRead={handleMarkNotificationRead}
+        onViewRequest={(id) => navigateTo('details', id)}
+      />
+      <main className={view === 'landing' ? 'mt-0' : 'container mx-auto p-4 md:p-6'}>
         {renderContent()}
       </main>
     </div>
