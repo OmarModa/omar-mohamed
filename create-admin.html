@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إنشاء حساب مشرف</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 400px;
+            width: 100%;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .info {
+            background: #f0f9ff;
+            border: 2px solid #3b82f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            direction: rtl;
+        }
+        .info p {
+            margin: 5px 0;
+            color: #1e40af;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #14b8a6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #0d9488;
+        }
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #10b981;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 إنشاء حساب المشرف</h1>
+
+        <div class="info">
+            <p><strong>البريد الإلكتروني:</strong> moraflash@gmail.com</p>
+            <p><strong>كلمة المرور:</strong> 68880122aA@</p>
+            <p><strong>الصلاحية:</strong> مشرف (Admin)</p>
+        </div>
+
+        <button id="createBtn" onclick="createAdmin()">إنشاء حساب المشرف</button>
+
+        <div id="result" class="result"></div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+        const supabaseUrl = 'https://vhymurviqcaszlrjcgce.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoeW11cnZpcWNhc3pscmpjZ2NlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ1NzI2MzYsImV4cCI6MjA4MDE0ODYzNn0.tg-ni9oyKO_BWlNdZfPVdZez8ocSWMRnm4Lu7WwX0O4';
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        window.createAdmin = async function() {
+            const btn = document.getElementById('createBtn');
+            const result = document.getElementById('result');
+
+            btn.disabled = true;
+            btn.textContent = 'جاري الإنشاء...';
+            result.style.display = 'none';
+
+            try {
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email: 'moraflash@gmail.com',
+                    password: '68880122aA@',
+                });
+
+                if (authError) throw authError;
+                if (!authData.user) throw new Error('لم يتم إرجاع المستخدم');
+
+                const { error: profileError } = await supabase
+                    .from('profiles')
+                    .insert({
+                        id: authData.user.id,
+                        name: 'المشرف العام',
+                        role: 'admin',
+                        contact_info: 'moraflash@gmail.com',
+                        region: 'العاصمة',
+                    });
+
+                if (profileError) throw profileError;
+
+                result.className = 'result success';
+                result.style.display = 'block';
+                result.innerHTML = `
+                    <strong>✅ تم إنشاء حساب المشرف بنجاح!</strong><br><br>
+                    يمكنك الآن تسجيل الدخول باستخدام:<br>
+                    <strong>البريد:</strong> moraflash@gmail.com<br>
+                    <strong>كلمة المرور:</strong> 68880122aA@<br><br>
+                    <a href="/" style="color: #0d9488; font-weight: bold;">الذهاب للصفحة الرئيسية</a>
+                `;
+
+                btn.textContent = '✓ تم الإنشاء';
+
+            } catch (error) {
+                console.error('Error:', error);
+                result.className = 'result error';
+                result.style.display = 'block';
+                result.innerHTML = `
+                    <strong>❌ حدث خطأ:</strong><br>
+                    ${error.message}<br><br>
+                    ${error.message.includes('already registered') ? 'الحساب موجود بالفعل! يمكنك تسجيل الدخول مباشرة.' : ''}
+                `;
+
+                btn.disabled = false;
+                btn.textContent = 'إنشاء حساب المشرف';
+            }
+        };
+    </script>
+</body>
+</html>

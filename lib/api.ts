@@ -11,7 +11,7 @@ export const api = {
   auth: {
     async signUp(email: string, password: string, metadata: {
       name: string;
-      role: 'customer' | 'provider';
+      role: 'customer' | 'provider' | 'admin';
       contact_info: string;
       region: string;
       address?: string;
