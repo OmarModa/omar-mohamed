@@ -1,23 +1,33 @@
 
 import type { User, Category, ServiceRequest, Bid, Rating, AppNotification } from './types';
 import { UserRole, RequestStatus, BidStatus } from './types';
-import { 
-    CarIcon, AcIcon, ElectricityIcon, CleaningIcon, 
-    GavelIcon, WrenchIcon, BookOpenIcon, SproutIcon, CodeIcon, TruckIcon, DropIcon
+import {
+    CarIcon, AcIcon, ElectricityIcon, CleaningIcon,
+    GavelIcon, WrenchIcon, BookOpenIcon, SproutIcon, CodeIcon, TruckIcon, DropIcon,
+    PaletteIcon, MegaphoneIcon, HammerIcon, SatelliteIcon, PartyPopperIcon, CoffeeIcon, HeartPulseIcon, PackageIcon
 } from './components/icons';
 
 export const CATEGORIES: Category[] = [
   { id: 1, name: 'سيارات', icon: CarIcon },
-  { id: 2, name: 'تكييف', icon: AcIcon },
+  { id: 2, name: 'التكييف والتهوية', icon: AcIcon },
   { id: 3, name: 'كهرباء', icon: ElectricityIcon },
-  { id: 11, name: 'سباكة وتسريبات', icon: DropIcon },
-  { id: 4, name: 'تنظيف', icon: CleaningIcon },
+  { id: 4, name: 'التنظيف', icon: CleaningIcon },
   { id: 5, name: 'محاماة واستشارات قانونية', icon: GavelIcon },
   { id: 6, name: 'صيانة أجهزة منزلية', icon: WrenchIcon },
-  { id: 7, name: 'دروس خصوصية وتدريب', icon: BookOpenIcon },
+  { id: 7, name: 'الدروس الخصوصية', icon: BookOpenIcon },
   { id: 8, name: 'تنسيق حدائق وزراعة', icon: SproutIcon },
-  { id: 9, name: 'تصميم وبرمجة', icon: CodeIcon },
-  { id: 10, name: 'نقل أثاث', icon: TruckIcon },
+  { id: 9, name: 'التصميم والجرافيك', icon: PaletteIcon },
+  { id: 10, name: 'نقل العفش', icon: TruckIcon },
+  { id: 11, name: 'سباكة وتسريبات', icon: DropIcon },
+  { id: 12, name: 'خدمات الويب والتسويق', icon: CodeIcon },
+  { id: 13, name: 'الطباعة والدعاية', icon: MegaphoneIcon },
+  { id: 14, name: 'المقاولات والترميم', icon: HammerIcon },
+  { id: 15, name: 'النجارة والحدادة', icon: HammerIcon },
+  { id: 16, name: 'خدمات الستلايت', icon: SatelliteIcon },
+  { id: 17, name: 'تجهيز الحفلات', icon: PartyPopperIcon },
+  { id: 18, name: 'الضيافة', icon: CoffeeIcon },
+  { id: 19, name: 'الرعاية الصحية المنزلية', icon: HeartPulseIcon },
+  { id: 20, name: 'التوصيل', icon: PackageIcon },
 ];
 
 export const REGIONS = [
