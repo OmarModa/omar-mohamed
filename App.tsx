@@ -18,6 +18,7 @@ import { TermsPage } from './components/TermsPage';
 import { HTTPSRedirect } from './components/HTTPSRedirect';
 import { UserIcon } from './components/icons';
 import { api } from './lib/api';
+import { supabase } from './lib/supabase';
 import { WhatsAppButton } from './components/WhatsAppButton';
 
 
@@ -42,6 +43,9 @@ const LoginModal: React.FC<{
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetMessage, setResetMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,65 +61,153 @@ const LoginModal: React.FC<{
     }
   };
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetMessage('');
+    setError('');
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
+
+      setResetMessage('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني. يرجى التحقق من صندوق الوارد.');
+      setTimeout(() => {
+        setShowForgotPassword(false);
+        setResetMessage('');
+        setResetEmail('');
+      }, 3000);
+    } catch (err: any) {
+      setError(err.message || 'حدث خطأ أثناء إرسال رابط إعادة التعيين.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" onClick={onClose}>
       <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">تسجيل الدخول</h2>
+          <h2 className="text-2xl font-bold text-gray-800">
+            {showForgotPassword ? 'إعادة تعيين كلمة المرور' : 'تسجيل الدخول'}
+          </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-              placeholder="example@email.com"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">كلمة المرور</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-              placeholder="••••••••"
-            />
-          </div>
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
-              {error}
+        {showForgotPassword ? (
+          <form onSubmit={handleResetPassword} className="space-y-4">
+            <p className="text-gray-600 text-sm mb-4">
+              أدخل بريدك الإلكتروني وسنرسل لك رابط لإعادة تعيين كلمة المرور
+            </p>
+            <div>
+              <label htmlFor="reset-email" className="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني</label>
+              <input
+                type="email"
+                id="reset-email"
+                value={resetEmail}
+                onChange={e => setResetEmail(e.target.value)}
+                required
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                placeholder="example@email.com"
+              />
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-teal-600 text-white font-bold py-3 px-4 rounded-md hover:bg-teal-700 transition-colors disabled:bg-gray-400"
-          >
-            {isLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
-          </button>
-        </form>
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+                {error}
+              </div>
+            )}
 
-        <div className="mt-6 pt-6 border-t text-center">
-          <p className="text-gray-600 mb-3">ليس لديك حساب؟</p>
-          <button
-            onClick={onShowRegister}
-            className="text-teal-600 hover:text-teal-800 font-bold underline"
-          >
-            إنشاء حساب جديد
-          </button>
-        </div>
+            {resetMessage && (
+              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md text-sm">
+                {resetMessage}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-teal-600 text-white font-bold py-3 px-4 rounded-md hover:bg-teal-700 transition-colors disabled:bg-gray-400"
+            >
+              {isLoading ? 'جاري الإرسال...' : 'إرسال رابط إعادة التعيين'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowForgotPassword(false)}
+              className="w-full text-gray-600 hover:text-gray-800 font-medium py-2"
+            >
+              العودة لتسجيل الدخول
+            </button>
+          </form>
+        ) : (
+          <>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني</label>
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  placeholder="example@email.com"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">كلمة المرور</label>
+                <input
+                  type="password"
+                  id="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+                  {error}
+                </div>
+              )}
+
+              <div className="text-left">
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-teal-600 hover:text-teal-800 text-sm font-medium"
+                >
+                  نسيت كلمة المرور؟
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-teal-600 text-white font-bold py-3 px-4 rounded-md hover:bg-teal-700 transition-colors disabled:bg-gray-400"
+              >
+                {isLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
+              </button>
+            </form>
+
+            <div className="mt-6 pt-6 border-t text-center">
+              <p className="text-gray-600 mb-3">ليس لديك حساب؟</p>
+              <button
+                onClick={onShowRegister}
+                className="text-teal-600 hover:text-teal-800 font-bold underline"
+              >
+                إنشاء حساب جديد
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
