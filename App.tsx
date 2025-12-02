@@ -520,6 +520,16 @@ const App: React.FC = () => {
       }
       await _createRequest(currentUser.uuid, { title, description, categoryId, beforeImageUrl: beforeImageUrl || undefined, suggestedBudget, region });
   }, [currentUser]);
+
+  const handleDeleteRequest = useCallback(async (requestId: number) => {
+      try {
+          await api.requests.delete(requestId);
+          await loadData();
+      } catch (error) {
+          console.error('Error deleting request:', error);
+          alert('حدث خطأ أثناء حذف الطلب');
+      }
+  }, []);
   
   const _placeBid = async (providerUuid: string, providerName: string, {requestId, price, message}: {requestId: number, price: number, message: string}) => {
       try {
@@ -751,13 +761,14 @@ const App: React.FC = () => {
                         onViewTerms={() => navigateTo('terms')}
                     />;
         case 'home':
-            return <HomePage 
+            return <HomePage
                         currentUser={currentUser}
                         requests={requests.filter(r => r.status === RequestStatus.Open)}
                         categories={CATEGORIES}
                         users={allUsers}
                         onCreateRequest={handleCreateRequest}
                         onViewDetails={(id) => navigateTo('details', id)}
+                        onDeleteRequest={handleDeleteRequest}
                         initialCategoryId={initialHomeCategory}
                     />;
         case 'services':

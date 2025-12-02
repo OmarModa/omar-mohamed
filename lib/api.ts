@@ -241,6 +241,15 @@ export const api = {
       if (error) throw error;
       return data as ServiceRequest;
     },
+
+    async delete(id: number) {
+      const { error } = await supabase
+        .from('service_requests')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    },
   },
 
   bids: {

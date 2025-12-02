@@ -202,10 +202,11 @@ interface HomePageProps {
     users: User[];
     onCreateRequest: (title: string, description: string, categoryId: number, beforeImageUrl: string | null, suggestedBudget?: number, region?: string) => void;
     onViewDetails: (id: number) => void;
+    onDeleteRequest?: (id: number) => void;
     initialCategoryId?: number;
 }
 
-export const HomePage: React.FC<HomePageProps> = ({ currentUser, requests, categories, users, onCreateRequest, onViewDetails, initialCategoryId }) => {
+export const HomePage: React.FC<HomePageProps> = ({ currentUser, requests, categories, users, onCreateRequest, onViewDetails, onDeleteRequest, initialCategoryId }) => {
     const [activeCategory, setActiveCategory] = useState<number | 'all'>('all');
     const [activeRegion, setActiveRegion] = useState<string>('all');
 
@@ -344,12 +345,14 @@ export const HomePage: React.FC<HomePageProps> = ({ currentUser, requests, categ
             {filteredRequests.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredRequests.map(request => (
-                        <RequestCard 
+                        <RequestCard
                             key={request.id}
                             request={request}
                             category={categories.find(c => c.id === request.categoryId)}
                             customerName={users.find(u => u.id === request.customerId)?.name || 'غير معروف'}
                             onViewDetails={onViewDetails}
+                            onDelete={onDeleteRequest}
+                            showDelete={currentUser?.id === request.customerId}
                         />
                     ))}
                 </div>
