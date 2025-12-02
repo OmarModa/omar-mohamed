@@ -816,6 +816,7 @@ const App: React.FC = () => {
                     users={allUsers}
                     categories={CATEGORIES}
                     onViewDetails={(id) => navigateTo('details', id)}
+                    onDeleteRequest={handleDeleteRequest}
                     getProviderAvgRating={getProviderAvgRating}
                     onUpdateVideo={(videoUrl) => handleUpdateUserVideo(currentUser.id, videoUrl)}
                     onUpdateAddress={(address) => handleUpdateUserAddress(currentUser.id, address)}
@@ -835,6 +836,7 @@ const App: React.FC = () => {
                     users={allUsers}
                     categories={CATEGORIES}
                     onViewDetails={(id) => navigateTo('details', id)}
+                    onDeleteRequest={handleDeleteRequest}
                     getProviderAvgRating={getProviderAvgRating}
                     onUpdateVideo={(videoUrl) => handleUpdateUserVideo(viewedUser.id, videoUrl)}
                     onUpdateAddress={(address) => handleUpdateUserAddress(viewedUser.id, address)}

@@ -14,6 +14,7 @@ interface MyProfilePageProps {
     users: User[];
     categories: Category[];
     onViewDetails: (id: number) => void;
+    onDeleteRequest?: (id: number) => void;
     getProviderAvgRating: (providerId: number) => number;
     onUpdateVideo: (videoUrl: string) => void;
     onUpdateAddress: (address: string) => void;
@@ -35,7 +36,9 @@ const HistoryRequestCard: React.FC<{
     category?: Category;
     otherPartyName: string;
     onViewDetails: (id: number) => void;
-}> = ({ request, category, otherPartyName, onViewDetails }) => {
+    onDelete?: (id: number) => void;
+    showDelete?: boolean;
+}> = ({ request, category, otherPartyName, onViewDetails, onDelete, showDelete }) => {
     
      const renderStatusBadge = () => {
         switch (request.status) {
@@ -63,17 +66,35 @@ const HistoryRequestCard: React.FC<{
                 <h3 className="font-bold text-lg text-gray-800">{request.title}</h3>
                 <p className="text-sm text-gray-600">{otherPartyName}</p>
             </div>
-            <button
-                onClick={() => onViewDetails(request.id)}
-                className="w-full sm:w-auto flex-shrink-0 px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors text-sm font-semibold"
-            >
-                عرض التفاصيل
-            </button>
+            <div className="flex gap-2 w-full sm:w-auto">
+                <button
+                    onClick={() => onViewDetails(request.id)}
+                    className="flex-grow sm:flex-grow-0 px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors text-sm font-semibold"
+                >
+                    عرض التفاصيل
+                </button>
+                {showDelete && onDelete && request.status === RequestStatus.Open && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (confirm('هل أنت متأكد من حذف هذا الطلب؟')) {
+                                onDelete(request.id);
+                            }
+                        }}
+                        className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-sm font-semibold"
+                        title="حذف الطلب"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                )}
+            </div>
         </div>
     );
 };
 
-export const MyProfilePage: React.FC<MyProfilePageProps> = ({ viewedUser, currentUser, requests, bids, ratings, users, categories, onViewDetails, getProviderAvgRating, onUpdateVideo, onUpdateAddress, onUpdateContact, onRoleChanged }) => {
+export const MyProfilePage: React.FC<MyProfilePageProps> = ({ viewedUser, currentUser, requests, bids, ratings, users, categories, onViewDetails, onDeleteRequest, getProviderAvgRating, onUpdateVideo, onUpdateAddress, onUpdateContact, onRoleChanged }) => {
     const [isUploadingVideo, setIsUploadingVideo] = useState(false);
     const [isEditingAddress, setIsEditingAddress] = useState(false);
     const [addressInput, setAddressInput] = useState(viewedUser.address || '');
@@ -239,6 +260,8 @@ export const MyProfilePage: React.FC<MyProfilePageProps> = ({ viewedUser, curren
                                 category={categories.find(c => c.id === req.categoryId)}
                                 otherPartyName={req.status === 'open' ? 'بانتظار العروض' : `المنفذ: ${provider?.name || 'غير محدد'}`}
                                 onViewDetails={onViewDetails}
+                                onDelete={onDeleteRequest}
+                                showDelete={isOwnProfile}
                             />
                         );
                     }) : <p>لم تقم بتقديم أي طلبات بعد.</p>}
