@@ -244,6 +244,16 @@ export const api = {
   },
 
   bids: {
+    async getAll() {
+      const { data, error } = await supabase
+        .from('bids')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data as Bid[];
+    },
+
     async getByRequestId(requestId: number) {
       const { data, error } = await supabase
         .from('bids')
@@ -295,6 +305,16 @@ export const api = {
   },
 
   ratings: {
+    async getAll() {
+      const { data, error } = await supabase
+        .from('ratings')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data as Rating[];
+    },
+
     async create(rating: Database['public']['Tables']['ratings']['Insert']) {
       const { data, error } = await supabase
         .from('ratings')
